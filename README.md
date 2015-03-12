@@ -6,7 +6,7 @@ Shows a headline, possibly followed by a subtitle and/or buttons.
 * [Appearance](#appearance)
 * [Usage](#usage)
 * [Features](#features)
-* [Integration](#Integration)
+* [Integration](#integration)
 * [References](#references)
 
 
