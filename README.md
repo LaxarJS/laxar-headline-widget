@@ -140,15 +140,15 @@ When a button or it's associated `access key` is pressed the widget MUST publish
 The widget supports the following event patterns as specified by the [LaxarJS Patterns] document.
 
 #### Actions
-* Action: buttons.\*.action
-* Role: Sender
-* Description: Publish a `takeActionRequest` event if a button is pressed (or activated by an `access key`).
+* Action: `buttons.*.action`
+   * Role: Sender
+   * Description: Publish a `takeActionRequest` event if a button is pressed (or activated by an `access key`).
 
 
 #### Flags
-* Flag: didChangeFlag.{features.\*.omitOn|hideOn|disableOn|busyOn}.{true|false}
-* Role: Receiver
-* Description: Determines the state of a button (hide or disable etc.).
+* Flag: `didChangeFlag.{features.*.omitOn|hideOn|disableOn|busyOn}.{true|false}`
+   * Role: Receiver
+   * Description: Determines the state of a button (hide or disable etc.).
 
 
 ## References
