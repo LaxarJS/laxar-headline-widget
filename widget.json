@@ -5,14 +5,17 @@
       "technology": "angular",
       "type": "widget"
    },
+
    "controls": [
-      "laxar_uikit/controls/button_list",
-      "laxar_uikit/controls/i18n"
+      "laxar-uikit/controls/i18n",
+      "laxar-button-list-control"
    ],
+
    "features": {
       "$schema": "http://json-schema.org/draft-04/schema#",
       "type": "object",
       "properties": {
+
          "headline": {
             "type": "object",
             "description": "The HTML text to be shown as a headline.",
@@ -34,6 +37,7 @@
             },
             "additionalProperties": false
          },
+
          "intro": {
             "type": "object",
             "description": "Additional introductory HTML text to be shown below the headline.",
@@ -48,6 +52,7 @@
             },
             "additionalProperties": false
          },
+
          "buttons": {
             "type": "array",
             "description": "A list of buttons to be displayed next to the headline, each with individual action and other properties.",
@@ -149,6 +154,7 @@
                }
             }
          },
+
          "buttonArea": {
             "type": "object",
             "description": "Additional introductory HTML text to be shown below the headline.",
@@ -163,6 +169,7 @@
                }
             }
          },
+
          "i18n": {
             "description": "Which locale to use for displaying this widget.",
             "type": "object",
