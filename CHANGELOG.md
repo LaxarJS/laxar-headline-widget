@@ -2,6 +2,9 @@
 
 ## Last Changes
 
+
+## v3.1.0
+
 - [#4](https://github.com/LaxarJS/ax-headline-widget/issues/4): updated LaxarJS dependencies and updated contribution information
 
 
