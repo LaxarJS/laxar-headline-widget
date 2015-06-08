@@ -2,10 +2,12 @@
 
 ## Last Changes
 
+- [#5](https://github.com/LaxarJS/ax-headline-widget/issues/5): Fixed license copyright holder
+
 
 ## v3.1.0
 
-- [#4](https://github.com/LaxarJS/ax-headline-widget/issues/4): updated LaxarJS dependencies and updated contribution information
+- [#4](https://github.com/LaxarJS/ax-headline-widget/issues/4): Updated LaxarJS dependencies and updated contribution information
 
 
 ## v3.0.0
