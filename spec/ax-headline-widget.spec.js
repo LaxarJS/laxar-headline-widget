@@ -4,13 +4,14 @@
  * http://laxarjs.org/license
  */
 define( [
+   'json!../widget.json',
    '../ax-headline-widget',
    'laxar/laxar_testing',
    './fixtures'
-], function( widgetModule, ax, fixtures ) {
+], function( descriptor, widgetModule, ax, fixtures ) {
    'use strict';
 
-   describe( 'An AxHeadlineWidget', function() {
+   describe( 'An ax-headline-widget', function() {
 
       var testBed;
       var qMock_;
@@ -31,7 +32,7 @@ define( [
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       beforeEach( function() {
-         testBed = ax.testing.portalMocksAngular.createControllerTestBed( 'laxarjs/ax-headline-widget' );
+         testBed = ax.testing.portalMocksAngular.createControllerTestBed( descriptor );
          testBed.useWidgetJson();
 
          qMock_ = ax.testing.portalMocksAngular.mockQ();
