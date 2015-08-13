@@ -2,6 +2,9 @@
 
 ## Last Changes
 
+
+## v3.2.0
+
 - [#6](https://github.com/LaxarJS/ax-headline-widget/issues/6): Support AMD references (and installation through bower)
 - [#7](https://github.com/LaxarJS/ax-headline-widget/issues/7): Added a `.travis.yml` for open continuous integration
 - [#5](https://github.com/LaxarJS/ax-headline-widget/issues/5): Fixed license copyright holder
