@@ -444,10 +444,10 @@ define( [
                var button = {
                   i18nHtmlLabel: { 'de-DE': 'A' },
                   action: 'actionA',
-                  disableOn: [ 'NOT_UNDOABLE' ],
-                  hideOn: [ 'GUEST_USER' ],
-                  busyOn: [ 'NAVIGATION' ],
-                  omitOn: [ '!HELP_AVAILABLE' ]
+                  disableOn: [ 'notUndoable' ],
+                  hideOn: [ 'guestUser' ],
+                  busyOn: [ 'navigation' ],
+                  omitOn: [ '!helpAvailable' ]
                };
 
                setupWithButtons( [ button ] );
@@ -456,10 +456,10 @@ define( [
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'sets the respective css class accordingly (R3.11)', function() {
-               changeFlag( 'GUEST_USER', true );
-               changeFlag( 'NAVIGATION', true );
-               changeFlag( 'HELP_AVAILABLE', true );
-               changeFlag( 'NOT_UNDOABLE', true );
+               changeFlag( 'guestUser', true );
+               changeFlag( 'navigation', true );
+               changeFlag( 'helpAvailable', true );
+               changeFlag( 'notUndoable', true );
 
                var modelButton = testBed.scope.model.areas.right[ 0 ];
 
@@ -475,10 +475,10 @@ define( [
                expect( modelButton.classes[ 'ax-omitted' ] ).toBe( false );
                expect( modelButton.classes[ 'ax-disabled' ] ).toBe( true );
 
-               changeFlag( 'GUEST_USER', false );
-               changeFlag( 'NAVIGATION', false );
-               changeFlag( 'HELP_AVAILABLE', false);
-               changeFlag( 'NOT_UNDOABLE', false );
+               changeFlag( 'guestUser', false );
+               changeFlag( 'navigation', false );
+               changeFlag( 'helpAvailable', false);
+               changeFlag( 'notUndoable', false );
 
                jasmine.Clock.tick( 0 );
 
@@ -494,7 +494,7 @@ define( [
                var spy = jasmine.createSpy( 'takeActionRequestSpy' );
                testBed.scope.eventBus.subscribe( 'takeActionRequest', spy );
 
-               changeFlag( 'GUEST_USER', true );
+               changeFlag( 'guestUser', true );
                jasmine.Clock.tick( 0 );
 
                testBed.scope.handleButtonClicked( testBed.scope.model.areas.right[ 0 ] );
@@ -509,7 +509,7 @@ define( [
                var spy = jasmine.createSpy( 'takeActionRequestSpy' );
                testBed.scope.eventBus.subscribe( 'takeActionRequest', spy );
 
-               changeFlag( 'GUEST_USER', false );
+               changeFlag( 'guestUser', false );
                jasmine.Clock.tick( 0 );
 
                testBed.scope.handleButtonClicked( testBed.scope.model.areas.right[ 0 ] );

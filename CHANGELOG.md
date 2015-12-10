@@ -2,6 +2,7 @@
 
 ## Last Changes
 
+- [#10](https://github.com/LaxarJS/ax-headline-widget/issues/10): Fixed broken spec test
 - [#9](https://github.com/LaxarJS/ax-headline-widget/issues/9): Expanded the widget definition
 
 
