@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#9](https://github.com/LaxarJS/ax-headline-widget/issues/9): Expanded the widget definition
+
 
 ## v3.2.0
 

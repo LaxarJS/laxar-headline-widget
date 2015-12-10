@@ -90,6 +90,8 @@
                   },
                   "action": {
                      "type": "string",
+                     "format": "topic",
+                     "axRole": "outlet",
                      "description": "Topic name of the action to request taking upon button activation.",
                      "required": true
                   },
@@ -127,28 +129,44 @@
                      "type": "array",
                      "description": "List of flags. Setting any of these causes the button to be hidden from view, unsetting any reverses the effect. Space for the button is reserved in either state.",
                      "items": {
-                        "type": "string"
+                        "type": "string",
+                        "format": "flag-topic",
+                        "axRole": "inlet",
+                        "axPattern": "flag",
+                        "description": "Flag topic. Prefixing the topic with '!' inverts its meaning."
                      }
                   },
                   "disableOn": {
                      "type": "array",
                      "description": "List of flags. Setting any of these causes the button to be disabled ('greyed out'), unsetting any reverses the effect.",
                      "items": {
-                        "type": "string"
+                        "type": "string",
+                        "format": "flag-topic",
+                        "axRole": "inlet",
+                        "axPattern": "flag",
+                        "description": "Flag topic. Prefixing the topic with '!' inverts its meaning."
                      }
                   },
                   "omitOn": {
                      "type": "array",
                      "description": "List of flags. Setting any of these causes the button to be removed from the layout, unsetting any reverses the effect. Other buttons may claim this button's space while it is omitted.",
                      "items": {
-                        "type": "string"
+                        "type": "string",
+                        "format": "flag-topic",
+                        "axRole": "inlet",
+                        "axPattern": "flag",
+                        "description": "Flag topic. Prefixing the topic with '!' inverts its meaning."
                      }
                   },
                   "busyOn": {
                      "type": "array",
                      "description": "List of flags. Setting any of these causes the button (icon) to indicate a busy state, unsetting any reverses the effect.",
                      "items": {
-                        "type": "string"
+                        "type": "string",
+                        "format": "flag-topic",
+                        "axRole": "inlet",
+                        "axPattern": "flag",
+                        "description": "Flag topic. Prefixing the topic with '!' inverts its meaning."
                      }
                   }
                }
@@ -176,6 +194,8 @@
             "properties": {
                "locale": {
                   "type": "string",
+                  "format": "topic",
+                  "axRole": "inlet",
                   "description": "The topic under which to expect the locale for this widget.",
                   "default": "default"
                }
