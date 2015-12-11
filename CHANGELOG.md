@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#11](https://github.com/LaxarJS/ax-headline-widget/issues/11): Fixed the Travis config for LaxarJS 1.0.0 compatibility
+
 
 ## v3.3.0
 
