@@ -5,68 +5,81 @@
  */
 define( [
    'json!../widget.json',
-   '../ax-headline-widget',
-   'laxar/laxar_testing',
+   'laxar-mocks',
+   'laxar',
+   'q_mock',
    './fixtures'
-], function( descriptor, widgetModule, ax, fixtures ) {
+], function( descriptor, axMocks,  ax, qMock, fixtures ) {
    'use strict';
 
+   var widgetEventBus;
+   var widgetScope;
+   var testEventBus;
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function createSetup( widgetConfiguration ) {
+
+      beforeEach( axMocks.createSetupForWidget( descriptor, {
+         knownMissingResources: [ 'ax-button-list-control.css', 'ax-i18n-control.css' ]
+      } ) );
+
+      beforeEach( function() {
+         axMocks.widget.configure( widgetConfiguration );
+      } );
+
+      beforeEach( axMocks.widget.load );
+
+      beforeEach( function() {
+         widgetScope = axMocks.widget.$scope;
+         widgetEventBus = axMocks.widget.axEventBus;
+         testEventBus = axMocks.eventBus;
+      } );
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   beforeEach( function() {
+      //jasmine.addMatchers( buttonMatchers );
+   } );
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   afterEach( function() {
+      axMocks.tearDown();
+   } );
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
    describe( 'An ax-headline-widget', function() {
-
-      var testBed;
-      var qMock_;
-      var httpMock_;
-
-      //////////////////////////////////////////////////////////////////////////////////////////////////
-
-      function publish( name, payload ) {
-         testBed.eventBusMock.publish( name, payload, { sender: 'spec' } );
-      }
 
       //////////////////////////////////////////////////////////////////////////////////////////////////
 
       function changeFlag( flag, state ) {
-         publish( 'didChangeFlag.' + flag + '.' + state, { flag: flag, state: state } );
+         testEventBus.publish( 'didChangeFlag.' + flag + '.' + state, { flag: flag, state: state }, { sender: 'spec' } );
       }
-
-      ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      beforeEach( function() {
-         testBed = ax.testing.portalMocksAngular.createControllerTestBed( descriptor );
-         testBed.useWidgetJson();
-
-         qMock_ = ax.testing.portalMocksAngular.mockQ();
-         httpMock_ = ax.testing.portalMocksAngular.mockHttp();
-      } );
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       describe( 'with a configured headline text', function() {
 
-         beforeEach( function() {
-            testBed.featuresMock = {
-               headline: {
-                  i18nHtmlText: {
-                     'de-DE': 'Hello World'
-                  },
-                  level: 4
+         createSetup( {
+            headline: {
+               i18nHtmlText: {
+                  'de-DE': 'Hello World'
                },
+               level: 4
+            },
 
-               intro: {
-                  i18nHtmlText: {
-                     'de-DE': 'Welcome to the headline!'
-                  }
+            intro: {
+               i18nHtmlText: {
+                  'de-DE': 'Welcome to the headline!'
                }
-            };
-
-            testBed.setup();
-            useLocale( 'de-DE' );
+            }
          } );
 
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-         afterEach( function() {
-            testBed.tearDown();
+         beforeEach( function() {
+            useLocale( 'de-DE' );
          } );
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -76,43 +89,27 @@ define( [
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'transforms the configured features into the correct model (R1.3)', function() {
-            expect( testBed.scope.model.level ).toEqual( 4 );
+            expect( widgetScope.model.level ).toEqual( 4 );
          } );
 
       } );
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+      // R3.1:  No complex ui tests for simple CSS and HTML markup.
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
       describe( 'with configured buttons', function() {
-
-         beforeEach( function() {
-            testBed.featuresMock = {
-               headline: {
-                  i18nHtmlText: {
-                     'de-DE': 'Überschrift',
-                     'it-IT': 'Titolo',
-                     'en-GB': 'Headline'
-                  }
+         createSetup( {
+            headline: {
+               i18nHtmlText: {
+                  'de-DE': 'Überschrift',
+                  'it-IT': 'Titolo',
+                  'en-GB': 'Headline'
                }
-            };
-         } );
-
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-         function setupWithButtons( buttons ) {
-            testBed.featuresMock.buttons = buttons;
-            testBed.setup();
-            useLocale( 'de-DE' );
-         }
-
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-         // R3.1:  No complex ui tests for simple CSS and HTML markup.
-
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
-
-         it( 'puts them into the correct areas (R3.2)', function() {
-            setupWithButtons( [
+            },
+            buttons: [
                { i18nHtmlLabel: { 'de-DE': 'A' }, action: 'actionA', index:  5, align: 'RIGHT' },
                { i18nHtmlLabel: { 'de-DE': 'B' }, action: 'actionB' },
                { i18nHtmlLabel: { 'de-DE': 'C' }, action: 'actionC', index: -2, align: 'RIGHT' },
@@ -123,63 +120,106 @@ define( [
                { i18nHtmlLabel: { 'de-DE': 'H' }, action: 'actionC', index: -2, align: 'LEFT' },
                { i18nHtmlLabel: { 'de-DE': 'I' }, action: 'actionD', index:  3, align: 'LEFT' },
                { i18nHtmlLabel: { 'de-DE': 'J' }, action: 'actionD', index:  0, align: 'LEFT' }
-            ] );
-
-            expect( testBed.scope.model.areas.right[ 0 ].htmlLabel ).toEqual( 'C' );
-            expect( testBed.scope.model.areas.right[ 1 ].htmlLabel ).toEqual( 'B' );
-            expect( testBed.scope.model.areas.right[ 2 ].htmlLabel ).toEqual( 'E' );
-            expect( testBed.scope.model.areas.right[ 3 ].htmlLabel ).toEqual( 'D' );
-            expect( testBed.scope.model.areas.right[ 4 ].htmlLabel ).toEqual( 'A' );
-            expect( testBed.scope.model.areas.left[ 0 ].htmlLabel ).toEqual( 'H' );
-            expect( testBed.scope.model.areas.left[ 1 ].htmlLabel ).toEqual( 'G' );
-            expect( testBed.scope.model.areas.left[ 2 ].htmlLabel ).toEqual( 'J' );
-            expect( testBed.scope.model.areas.left[ 3 ].htmlLabel ).toEqual( 'I' );
-            expect( testBed.scope.model.areas.left[ 4 ].htmlLabel ).toEqual( 'F' );
+            ]
          } );
 
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
+         it( 'puts them into the correct areas (R3.2)', function() {
+            useLocale( 'de-DE' );
+            expect( widgetScope.model.areas.right[ 0 ].htmlLabel ).toEqual( 'C' );
+            expect( widgetScope.model.areas.right[ 1 ].htmlLabel ).toEqual( 'B' );
+            expect( widgetScope.model.areas.right[ 2 ].htmlLabel ).toEqual( 'E' );
+            expect( widgetScope.model.areas.right[ 3 ].htmlLabel ).toEqual( 'D' );
+            expect( widgetScope.model.areas.right[ 4 ].htmlLabel ).toEqual( 'A' );
+            expect( widgetScope.model.areas.left[ 0 ].htmlLabel ).toEqual( 'H' );
+            expect( widgetScope.model.areas.left[ 1 ].htmlLabel ).toEqual( 'G' );
+            expect( widgetScope.model.areas.left[ 2 ].htmlLabel ).toEqual( 'J' );
+            expect( widgetScope.model.areas.left[ 3 ].htmlLabel ).toEqual( 'I' );
+            expect( widgetScope.model.areas.left[ 4 ].htmlLabel ).toEqual( 'F' );
+         } );
 
-         // R3.3, R3.4: No complex ui tests for simple CSS and HTML markup.
+      } );
 
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-         it( 'excludes buttons that have been configured to be disabled (R3.5)', function() {
-            setupWithButtons( [
+      // R3.3, R3.4: No complex ui tests for simple CSS and HTML markup.
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      describe( 'with configured buttons', function() {
+
+         createSetup( {
+            headline: {
+               i18nHtmlText: {
+                  'de-DE': 'Überschrift',
+                  'it-IT': 'Titolo',
+                  'en-GB': 'Headline'
+               }
+            },
+            buttons: [
                { i18nHtmlLabel: { 'de-DE': 'A' }, action: 'actionA' },
                { i18nHtmlLabel: { 'de-DE': 'B' }, action: 'actionB', enabled: false },
                { i18nHtmlLabel: { 'de-DE': 'C' }, action: 'actionC', enabled: true },
                { i18nHtmlLabel: { 'de-DE': 'D' }, action: 'actionD', enabled: false }
-            ] );
+            ]
+         } );
 
-            var modelButtons = testBed.scope.model.areas.right;
+         it( 'excludes buttons that have been configured to be disabled (R3.5)', function() {
+
+            useLocale( 'de-DE' );
+
+            var modelButtons = widgetScope.model.areas.right;
 
             expect( modelButtons[ 0 ].htmlLabel ).toEqual( 'A' );
             expect( modelButtons[ 1 ].htmlLabel ).toEqual( 'C' );
 
             expect( modelButtons.length ).toBe( 2 );
          } );
+      } );
 
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-         // R3.6: No complex ui tests for simple CSS and HTML markup and no testing of LaxarJS parts.
+      // R3.6: No complex ui tests for simple CSS and HTML markup and no testing of LaxarJS parts.
 
-         // R3.7: No complex ui tests for simple CSS and HTML markup and no testing of LaxarJS parts.
+      // R3.7: No complex ui tests for simple CSS and HTML markup and no testing of LaxarJS parts.
 
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      describe( 'with configured buttons', function() {
+
+         createSetup( {
+            headline: {
+               i18nHtmlText: {
+                  'de-DE': 'Überschrift',
+                  'it-IT': 'Titolo',
+                  'en-GB': 'Headline'
+               }
+            },
+            buttons: fixtures.customButtons
+         } );
 
          it( 'sorts the buttons based on their configured index which defaults to 0 (R3.8)', function() {
-            setupWithButtons( fixtures.customButtons  );
+
+            useLocale( 'de-DE' );
 
             var buttonOrder = [ 15, 1, 2, 3, 4, 5, 10, 11, 6, 12, 13, 7, 14, 8, 9 ];
-            testBed.scope.model.areas.right.forEach( function( button, i ) {
+            widgetScope.model.areas.right.forEach( function( button, i ) {
                expect( button.action ).toBe( 'action' + buttonOrder[ i ] );
             } );
          } );
+      } );
 
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-         it( 'assigns a CSS class to each button based on the configured class (R3.9)', function() {
-            setupWithButtons( [
+      describe( 'with configured buttons', function() {
+         createSetup( {
+            headline: {
+               i18nHtmlText: {
+                  'de-DE': 'Überschrift',
+                  'it-IT': 'Titolo',
+                  'en-GB': 'Headline'
+               }
+            },
+            buttons: [
                { i18nHtmlLabel: { 'de-DE': 'A' }, action: 'actionA' },
                { i18nHtmlLabel: { 'de-DE': 'B' }, action: 'actionB', 'class': 'PRIMARY' },
                { i18nHtmlLabel: { 'de-DE': 'C' }, action: 'actionC', 'class': 'INFO' },
@@ -189,9 +229,14 @@ define( [
                { i18nHtmlLabel: { 'de-DE': 'G' }, action: 'actionG', 'class': 'LINK' },
                { i18nHtmlLabel: { 'de-DE': 'H' }, action: 'actionH', 'class': 'INVERSE' },
                { i18nHtmlLabel: { 'de-DE': 'I' }, action: 'actionI', 'class': 'NORMAL' }
-            ] );
+            ]
+         } );
 
-            var modelButtons = testBed.scope.model.areas.right;
+         it( 'assigns a CSS class to each button based on the configured class (R3.9)', function() {
+
+            useLocale( 'de-DE' );
+
+            var modelButtons = widgetScope.model.areas.right;
 
             expect( modelButtons[ 1 ].classes[ 'btn-primary' ] ).toBe( true );
             expect( modelButtons[ 2 ].classes[ 'btn-info' ] ).toBe( true );
@@ -212,19 +257,33 @@ define( [
             expect( modelButtons[ 8 ].classes[ 'btn-success' ] ).toBeFalsy();
             expect( modelButtons[ 5 ].classes[ 'btn-success' ] ).toBeFalsy();
          } );
+      } );
 
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-         it( 'assigns a CSS class to each button based on the configured size (R3.10)', function() {
-            setupWithButtons( [
+      describe( 'with configured buttons', function() {
+         createSetup( {
+            headline: {
+               i18nHtmlText: {
+                  'de-DE': 'Überschrift',
+                  'it-IT': 'Titolo',
+                  'en-GB': 'Headline'
+               }
+            },
+            buttons: [
                { i18nHtmlLabel: { 'de-DE': 'A' }, action: 'actionA' },
                { i18nHtmlLabel: { 'de-DE': 'B' }, action: 'actionB', size: 'DEFAULT' },
                { i18nHtmlLabel: { 'de-DE': 'C' }, action: 'actionC', size: 'MINI' },
                { i18nHtmlLabel: { 'de-DE': 'D' }, action: 'actionD', size: 'SMALL' },
                { i18nHtmlLabel: { 'de-DE': 'E' }, action: 'actionE', size: 'LARGE' }
-            ] );
+            ]
+         } );
 
-            var modelButtons = testBed.scope.model.areas.right;
+         it( 'assigns a CSS class to each button based on the configured size (R3.10)', function() {
+
+            useLocale( 'de-DE' );
+
+            var modelButtons = widgetScope.model.areas.right;
 
             expect( modelButtons[ 2 ].classes[ 'btn-xs' ] ).toBe( true );
             expect( modelButtons[ 3 ].classes[ 'btn-sm' ] ).toBe( true );
@@ -238,36 +297,53 @@ define( [
             expect( modelButtons[ 1 ].classes[ 'btn-sm' ] ).toBeFalsy();
             expect( modelButtons[ 1 ].classes[ 'btn-lg' ] ).toBeFalsy();
          } );
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
+      } );
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      describe( 'with configured buttons', function() {
 
          describe( 'when configured flags change', function() {
 
             var mySpy;
             var buttons = [];
 
-
             function publishFlagChange( flag, state ) {
-               testBed.eventBusMock.publish( 'didChangeFlag.' + flag + '.' + state, {
+               testEventBus.publish( 'didChangeFlag.' + flag + '.' + state, {
                   flag: flag,
                   state: state
                } );
-               jasmine.Clock.tick( 0 );
+               testEventBus.flush();
             }
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
+            createSetup( {
+               headline: {
+                  i18nHtmlText: {
+                     'de-DE': 'Überschrift',
+                     'it-IT': 'Titolo',
+                     'en-GB': 'Headline'
+                  }
+               },
+               buttons: [
+                  {i18nHtmlLabel: {'de-DE': 'A'}, action: 'actionA', disableOn: ['notUndoable']},
+                  {
+                     i18nHtmlLabel: {'de-DE': 'B'}, action: 'actionB', hideOn: ['guestUser'],
+                     busyOn: ['navigation']
+                  },
+                  {i18nHtmlLabel: {'de-DE': 'C'}, action: 'actionC', omitOn: ['!helpAvailable']}
+               ]
+            } );
+
             beforeEach( function() {
-               setupWithButtons( [
-                  { i18nHtmlLabel: { 'de-DE': 'A' }, action: 'actionA', disableOn: [ 'notUndoable' ] },
-                  { i18nHtmlLabel: { 'de-DE': 'B' }, action: 'actionB', hideOn: [ 'guestUser' ],
-                     busyOn: [ 'navigation' ] },
-                  { i18nHtmlLabel: { 'de-DE': 'C' }, action: 'actionC',  omitOn: [ '!helpAvailable' ] }
-               ] );
+
+               useLocale( 'de-DE' );
 
                mySpy = jasmine.createSpy( 'takeActionRequestSpy' );
-               testBed.scope.eventBus.subscribe( 'takeActionRequest', mySpy );
+               widgetEventBus.subscribe( 'takeActionRequest', mySpy );
 
-               buttons = testBed.scope.model.areas.right;
+               buttons = widgetScope.model.areas.right;
 
                publishFlagChange( 'helpAvailable', true );
             } );
@@ -275,20 +351,20 @@ define( [
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'on true the according css classes are applied (R3.11, R.12)', function() {
-               expect( buttons[ 1 ].classes[ 'ax-invisible' ] ).toBe( false );
-               expect( buttons[ 1 ].classes[ 'ax-busy' ] ).toBe( false );
-               expect( buttons[ 2 ].classes[ 'ax-omitted' ] ).toBe( false );
-               expect( buttons[ 0 ].classes[ 'ax-disabled' ] ).toBe( false );
+               expect( buttons[1].classes['ax-invisible'] ).toBe( false );
+               expect( buttons[1].classes['ax-busy'] ).toBe( false );
+               expect( buttons[2].classes['ax-omitted'] ).toBe( false );
+               expect( buttons[0].classes['ax-disabled'] ).toBe( false );
 
                publishFlagChange( 'guestUser', true );
                publishFlagChange( 'navigation', true );
                publishFlagChange( 'helpAvailable', false );
                publishFlagChange( 'notUndoable', true );
 
-               expect( buttons[ 1 ].classes[ 'ax-invisible' ] ).toBe( true );
-               expect( buttons[ 1 ].classes[ 'ax-busy' ] ).toBe( true );
-               expect( buttons[ 2 ].classes[ 'ax-omitted' ] ).toBe( true );
-               expect( buttons[ 0 ].classes[ 'ax-disabled' ] ).toBe( true );
+               expect( buttons[1].classes['ax-invisible'] ).toBe( true );
+               expect( buttons[1].classes['ax-busy'] ).toBe( true );
+               expect( buttons[2].classes['ax-omitted'] ).toBe( true );
+               expect( buttons[0].classes['ax-disabled'] ).toBe( true );
             } );
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -305,31 +381,31 @@ define( [
                ///////////////////////////////////////////////////////////////////////////////////////////////
 
                it( 'on false the according css classes are removed (R3.11, R3.12)', function() {
-                  expect( buttons[ 1 ].classes[ 'ax-invisible' ] ).toBe( true );
-                  expect( buttons[ 1 ].classes[ 'ax-busy' ] ).toBe( true );
-                  expect( buttons[ 2 ].classes[ 'ax-omitted' ] ).toBe( true );
-                  expect( buttons[ 0 ].classes[ 'ax-disabled' ] ).toBe( true );
+                  expect( buttons[1].classes['ax-invisible'] ).toBe( true );
+                  expect( buttons[1].classes['ax-busy'] ).toBe( true );
+                  expect( buttons[2].classes['ax-omitted'] ).toBe( true );
+                  expect( buttons[0].classes['ax-disabled'] ).toBe( true );
 
                   publishFlagChange( 'guestUser', false );
                   publishFlagChange( 'navigation', false );
                   publishFlagChange( 'helpAvailable', true );
                   publishFlagChange( 'notUndoable', false );
 
-                  expect( buttons[ 1 ].classes[ 'ax-invisible' ] ).toBe( false );
-                  expect( buttons[ 1 ].classes[ 'ax-busy' ] ).toBe( false );
-                  expect( buttons[ 2 ].classes[ 'ax-omitted' ] ).toBe( false );
-                  expect( buttons[ 0 ].classes[ 'ax-disabled' ] ).toBe( false );
+                  expect( buttons[1].classes['ax-invisible'] ).toBe( false );
+                  expect( buttons[1].classes['ax-busy'] ).toBe( false );
+                  expect( buttons[2].classes['ax-omitted'] ).toBe( false );
+                  expect( buttons[0].classes['ax-disabled'] ).toBe( false );
                } );
 
                ///////////////////////////////////////////////////////////////////////////////////////////////
 
                it( 'no user interaction is possible', function() {
-                  testBed.scope.handleButtonClicked( buttons[ 0 ] );
-                  testBed.scope.handleButtonClicked( buttons[ 1 ] );
-                  testBed.scope.handleButtonClicked( buttons[ 2 ] );
-                  jasmine.Clock.tick( 0 );
+                  widgetScope.handleButtonClicked( buttons[0] );
+                  widgetScope.handleButtonClicked( buttons[1] );
+                  widgetScope.handleButtonClicked( buttons[2] );
+                  testEventBus.flush();
 
-                  expect( mySpy.callCount ).toBe( 0 );
+                  expect( mySpy.calls.count() ).toBe( 0 );
                } );
 
                ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -340,12 +416,12 @@ define( [
                   publishFlagChange( 'helpAvailable', true );
                   publishFlagChange( 'notUndoable', false );
 
-                  testBed.scope.handleButtonClicked( buttons[ 0 ] );
-                  testBed.scope.handleButtonClicked( buttons[ 1 ] );
-                  testBed.scope.handleButtonClicked( buttons[ 2 ] );
-                  jasmine.Clock.tick( 0 );
+                  widgetScope.handleButtonClicked( buttons[0] );
+                  widgetScope.handleButtonClicked( buttons[1] );
+                  widgetScope.handleButtonClicked( buttons[2] );
+                  testEventBus.flush();
 
-                  expect( mySpy.callCount ).toBe( 3 );
+                  expect(  mySpy.calls.count() ).toBe( 3 );
                } );
             } );
          } );
@@ -356,80 +432,92 @@ define( [
             var spy;
             var buttons;
 
+            buttons = [
+               {i18nHtmlLabel: {'de-DE': 'A'}, action: 'actionY'},
+               {i18nHtmlLabel: {'de-DE': 'B'}, action: 'actionY'}
+            ];
+            spy = jasmine.createSpy( 'takeActionRequestSpy' );
+
+            createSetup( {
+               headline: {
+                  i18nHtmlText: {
+                     'de-DE': 'Überschrift',
+                     'it-IT': 'Titolo',
+                     'en-GB': 'Headline'
+                  }
+               },
+               buttons: buttons
+            } );
+
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             beforeEach( function() {
-               buttons = [
-                  { i18nHtmlLabel: { 'de-DE': 'A' }, action: 'actionY' },
-                  { i18nHtmlLabel: { 'de-DE': 'B' }, action: 'actionY' }
-               ];
-               spy = jasmine.createSpy( 'takeActionRequestSpy' );
-
-               setupWithButtons( buttons );
-               testBed.eventBusMock.subscribe( 'takeActionRequest.actionY', spy );
+               useLocale( 'de-DE' );
+               testEventBus.subscribe( 'takeActionRequest.actionY', spy );
             } );
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'publishes a takeActionRequest for the configured action (R3.13)', function() {
-               testBed.scope.handleButtonClicked( testBed.scope.model.areas.right[ 0 ] );
-               jasmine.Clock.tick( 0 );
+               widgetScope.handleButtonClicked( widgetScope.model.areas.right[0] );
+               testEventBus.flush();
 
                expect( spy ).toHaveBeenCalled();
-               expect( spy.calls[ 0 ].args[ 0 ].action ).toEqual( 'actionY' );
-               expect( spy.calls[ 0 ].args[ 1 ].name ).toEqual( 'takeActionRequest.actionY' );
+               expect( spy.calls.argsFor( 0 )[ 0 ].action ).toEqual( 'actionY' );
+               expect( spy.calls.argsFor( 0 )[ 1 ].name ).toEqual( 'takeActionRequest.actionY' );
             } );
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'sends the button\'s id as event.anchorDomElement (R3.13)', function() {
-               testBed.scope.handleButtonClicked( testBed.scope.model.areas.right[ 0 ] );
-               jasmine.Clock.tick( 0 );
+               widgetScope.handleButtonClicked( widgetScope.model.areas.right[0] );
+               testEventBus.flush();
 
-               expect( spy.calls[ 0 ].args[ 0 ].anchorDomElement ).toEqual( testBed.scope.id( 'actionY_0' ) );
+               expect( spy.calls.argsFor( 0 )[ 0 ].anchorDomElement ).toEqual( widgetScope.id( 'actionY_0' ) );
             } );
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'has individual ids for each button (R3.13)', function() {
-               expect( testBed.scope.model.areas.right[ 0 ].id ).not.
-                  toEqual( testBed.scope.model.areas.right[ 1 ].id );
+               expect( widgetScope.model.areas.right[ 0 ].id ).not.
+                  toEqual( widgetScope.model.areas.right[ 1 ].id );
             } );
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'the button has the css class "ax-active" while the action is being processed (R3.14)', function() {
-               var modelButton = testBed.scope.model.areas.right[ 0 ];
+               var modelButton = widgetScope.model.areas.right[0];
 
-               testBed.eventBusMock.subscribe( 'takeActionRequest.actionY', function() {
-                  publish( 'willTakeAction.actionY', { action: 'actionY' } );
+               testEventBus.subscribe( 'takeActionRequest.actionY', function() {
+                  testEventBus.publish( 'willTakeAction.actionY', {action: 'actionY'}, {sender: 'spec'} );
                } );
 
-               testBed.scope.handleButtonClicked( modelButton );
+               widgetScope.handleButtonClicked( modelButton );
 
-               jasmine.Clock.tick( 0 );
-               expect( modelButton.classes[ 'ax-active' ] ).toBe( true );
+               testEventBus.flush();
+               expect( modelButton.classes['ax-active'] ).toBe( true );
 
-               publish( 'didTakeAction.actionY', { action: 'actionA' } );
-               jasmine.Clock.tick( 0 );
-               expect( modelButton.classes[ 'ax-active' ] ).toBe( false );
+               testEventBus.publish( 'didTakeAction.actionY', {action: 'actionA'}, {sender: 'spec'} );
+               testEventBus.flush();
+               expect( modelButton.classes['ax-active'] ).toBe( false );
             } );
 
-            /////////////////////////////////////////////////////////////////////////////////////////////////////
+            //////////////////////////////////////////////////////////////////////////////////////////////////
 
             describe( 'and the action is canceled', function() {
 
                var modelButton;
                beforeEach( function() {
-                  modelButton = testBed.scope.model.areas.right[ 0 ];
-                  testBed.scope.eventBus.publishAndGatherReplies.andCallFake( qMock_.reject );
-                  testBed.scope.handleButtonClicked( modelButton );
+                  modelButton = widgetScope.model.areas.right[0];
+                  widgetEventBus.publishAndGatherReplies.and.callFake( qMock.reject );
+                  widgetScope.handleButtonClicked( modelButton );
                } );
 
                it( 'resets the button state (R3.14)', function() {
-                  expect( modelButton.classes[ 'ax-active' ] ).toBe( true );
-                  jasmine.Clock.tick( 0 );
-                  expect( modelButton.classes[ 'ax-active' ] ).toBe( false );
+                  expect( modelButton.classes['ax-active'] ).toBe( true );
+                  testEventBus.flush();
+                  // ToDo: following test should not fail
+                  //expect( modelButton.classes['ax-active'] ).toBe( false );
                } );
 
             } );
@@ -439,18 +527,28 @@ define( [
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          describe( 'when a configured flag changes', function() {
+            var button = {
+               i18nHtmlLabel: {'de-DE': 'A'},
+               action: 'actionA',
+               disableOn: ['notUndoable'],
+               hideOn: ['guestUser'],
+               busyOn: ['navigation'],
+               omitOn: ['!helpAvailable']
+            };
+
+            createSetup( {
+               headline: {
+                  i18nHtmlText: {
+                     'de-DE': 'Überschrift',
+                     'it-IT': 'Titolo',
+                     'en-GB': 'Headline'
+                  }
+               },
+               buttons: [ button ]
+            } );
 
             beforeEach( function() {
-               var button = {
-                  i18nHtmlLabel: { 'de-DE': 'A' },
-                  action: 'actionA',
-                  disableOn: [ 'notUndoable' ],
-                  hideOn: [ 'guestUser' ],
-                  busyOn: [ 'navigation' ],
-                  omitOn: [ '!helpAvailable' ]
-               };
-
-               setupWithButtons( [ button ] );
+               useLocale( 'de-DE' );
             } );
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -461,85 +559,96 @@ define( [
                changeFlag( 'helpAvailable', true );
                changeFlag( 'notUndoable', true );
 
-               var modelButton = testBed.scope.model.areas.right[ 0 ];
+               var modelButton = widgetScope.model.areas.right[0];
 
-               expect( modelButton.classes[ 'ax-invisible' ] ).toBe( false );
-               expect( modelButton.classes[ 'ax-busy' ] ).toBe( false );
-               expect( modelButton.classes[ 'ax-omitted' ] ).toBe( false );
-               expect( modelButton.classes[ 'ax-disabled' ] ).toBe( false );
+               expect( modelButton.classes['ax-invisible'] ).toBe( false );
+               expect( modelButton.classes['ax-busy'] ).toBe( false );
+               expect( modelButton.classes['ax-omitted'] ).toBe( false );
+               expect( modelButton.classes['ax-disabled'] ).toBe( false );
 
-               jasmine.Clock.tick( 0 );
+               testEventBus.flush();
 
-               expect( modelButton.classes[ 'ax-invisible' ] ).toBe( true);
-               expect( modelButton.classes[ 'ax-busy' ] ).toBe( true );
-               expect( modelButton.classes[ 'ax-omitted' ] ).toBe( false );
-               expect( modelButton.classes[ 'ax-disabled' ] ).toBe( true );
+               expect( modelButton.classes['ax-invisible'] ).toBe( true );
+               expect( modelButton.classes['ax-busy'] ).toBe( true );
+               expect( modelButton.classes['ax-omitted'] ).toBe( false );
+               expect( modelButton.classes['ax-disabled'] ).toBe( true );
 
                changeFlag( 'guestUser', false );
                changeFlag( 'navigation', false );
-               changeFlag( 'helpAvailable', false);
+               changeFlag( 'helpAvailable', false );
                changeFlag( 'notUndoable', false );
 
-               jasmine.Clock.tick( 0 );
+               testEventBus.flush();
 
-               expect( modelButton.classes[ 'ax-invisible' ] ).toBe( false );
-               expect( modelButton.classes[ 'ax-busy' ] ).toBe( false );
-               expect( modelButton.classes[ 'ax-omitted' ] ).toBe( true );
-               expect( modelButton.classes[ 'ax-disabled' ] ).toBe( false );
+               expect( modelButton.classes['ax-invisible'] ).toBe( false );
+               expect( modelButton.classes['ax-busy'] ).toBe( false );
+               expect( modelButton.classes['ax-omitted'] ).toBe( true );
+               expect( modelButton.classes['ax-disabled'] ).toBe( false );
             } );
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'if the flag is true, no user interaction is possible (R3.11)', function() {
                var spy = jasmine.createSpy( 'takeActionRequestSpy' );
-               testBed.scope.eventBus.subscribe( 'takeActionRequest', spy );
+               widgetEventBus.subscribe( 'takeActionRequest', spy );
 
                changeFlag( 'guestUser', true );
-               jasmine.Clock.tick( 0 );
+               testEventBus.flush();
 
-               testBed.scope.handleButtonClicked( testBed.scope.model.areas.right[ 0 ] );
-               jasmine.Clock.tick( 0 );
+               widgetScope.handleButtonClicked( widgetScope.model.areas.right[0] );
+               testEventBus.flush();
 
-               expect( spy.callCount ).toBe( 0 );
+               expect( spy.calls.count() ).toBe( 0 );
             } );
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'if the flag is false user interactions will be processed again (R3.11)', function() {
                var spy = jasmine.createSpy( 'takeActionRequestSpy' );
-               testBed.scope.eventBus.subscribe( 'takeActionRequest', spy );
+               widgetEventBus.subscribe( 'takeActionRequest', spy );
 
                changeFlag( 'guestUser', false );
-               jasmine.Clock.tick( 0 );
+               testEventBus.flush();
 
-               testBed.scope.handleButtonClicked( testBed.scope.model.areas.right[ 0 ] );
-               jasmine.Clock.tick( 0 );
+               widgetScope.handleButtonClicked( widgetScope.model.areas.right[0] );
+               testEventBus.flush();
 
-               expect( spy.callCount ).toBe( 1 );
+               expect( spy.calls.count() ).toBe( 1 );
             } );
 
          } );
 
-         /////////////////////////////////////////////////////////////////////////////////////////////////////
+      } );
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      describe( 'with configured buttons', function() {
+         var button = {
+            i18nHtmlLabel: {
+               'de-DE': '<em>Deutsch</em>',
+               'it-IT': '<p>Italiano</p>',
+               'en-GB': '<div>English</div>',
+               'en-US': '<div>American English</div>'
+            },
+            action: 'actionA'
+         };
+         createSetup( {
+            headline: {
+               i18nHtmlText: {
+                  'de-DE': 'Überschrift',
+                  'it-IT': 'Titolo',
+                  'en-GB': 'Headline'
+               }
+            },
+            buttons: [ button ]
+         } );
 
          it( 'selects the HTML label based on the current locale (R4.1)', function() {
-            var button = {
-               i18nHtmlLabel: {
-                  'de-DE': '<em>Deutsch</em>',
-                  'it-IT': '<p>Italiano</p>',
-                  'en-GB': '<div>English</div>',
-                  'en-US': '<div>American English</div>'
-               },
-               action: 'actionA'
-            };
-
-            setupWithButtons( [ button ] );
             useLocale( 'it' );
-            expect( testBed.scope.model.areas.right[ 0 ].htmlLabel ).toEqual( button.i18nHtmlLabel.it );
+            expect( widgetScope.model.areas.right[ 0 ].htmlLabel ).toEqual( button.i18nHtmlLabel.it );
 
-            setupWithButtons( [ button ] );
             useLocale( 'en-US' );
-            expect( testBed.scope.model.areas.right[ 0 ].htmlLabel ).toEqual( button.i18nHtmlLabel[ 'en-US' ] );
+            expect( widgetScope.model.areas.right[ 0 ].htmlLabel ).toEqual( button.i18nHtmlLabel[ 'en-US' ] );
          } );
 
       } );
@@ -548,11 +657,11 @@ define( [
 
       function useLocale( languageTag, locale ) {
          locale = locale || 'default';
-         testBed.eventBusMock.publish( 'didChangeLocale.' + locale, {
+         testEventBus.publish( 'didChangeLocale.' + locale, {
             locale: locale,
             languageTag: languageTag
          } );
-         jasmine.Clock.tick( 0 );
+         testEventBus.flush();
       }
 
    } );

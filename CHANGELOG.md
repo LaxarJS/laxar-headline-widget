@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#10](https://github.com/LaxarJS/ax-headline-widget/issues/12): Use laxar-mocks instead of laxar-testing now
+
 
 ## v3.3.0
 
