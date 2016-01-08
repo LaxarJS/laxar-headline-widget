@@ -7,9 +7,9 @@ define( [
    'json!../widget.json',
    'laxar-mocks',
    'laxar',
-   'q_mock',
+   'angular-mocks',
    './fixtures'
-], function( descriptor, axMocks,  ax, qMock, fixtures ) {
+], function( descriptor, axMocks,  ax, ngMocks, fixtures ) {
    'use strict';
 
    var widgetEventBus;
@@ -36,12 +36,6 @@ define( [
          testEventBus = axMocks.eventBus;
       } );
    }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   beforeEach( function() {
-      //jasmine.addMatchers( buttonMatchers );
-   } );
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -505,19 +499,18 @@ define( [
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             describe( 'and the action is canceled', function() {
-
                var modelButton;
-               beforeEach( function() {
+
+               beforeEach( ngMocks.inject( function( $q ) {
                   modelButton = widgetScope.model.areas.right[0];
-                  widgetEventBus.publishAndGatherReplies.and.callFake( qMock.reject );
+                  widgetEventBus.publishAndGatherReplies.and.callFake( $q.reject );
                   widgetScope.handleButtonClicked( modelButton );
-               } );
+               } ) );
 
                it( 'resets the button state (R3.14)', function() {
                   expect( modelButton.classes['ax-active'] ).toBe( true );
-                  testEventBus.flush();
-                  // ToDo: following test should not fail
-                  //expect( modelButton.classes['ax-active'] ).toBe( false );
+                  widgetScope.$apply();
+                  expect( modelButton.classes['ax-active'] ).toBe( false );
                } );
 
             } );
