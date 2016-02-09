@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#14](https://github.com/LaxarJS/ax-headline-widget/issues/14): performance: one-time-bind feature configuration
+
 
 ## v3.4.0
 
