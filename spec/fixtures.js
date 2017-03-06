@@ -1,9 +1,9 @@
 /**
- * Copyright 2015 aixigo AG
+ * Copyright 2015-2017 aixigo AG
  * Released under the MIT license.
  * http://laxarjs.org/license
  */
-define( {
+export default {
    customButtons: [
       {
          enabled: true,
@@ -89,5 +89,5 @@ define( {
          action: 'action15',
          index: -1
       }
-  ]
-} );
+   ]
+};
