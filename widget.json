@@ -1,5 +1,5 @@
 {
-   "name": "ax-headline-widget",
+   "name": "laxar-headline-widget",
    "description": "Shows a headline, possibly followed by a subtitle and/or buttons.",
    "integration": {
       "technology": "angular",
@@ -7,9 +7,10 @@
    },
 
    "controls": [
-      "laxar-uikit/controls/i18n",
       "laxar-button-list-control"
    ],
+
+   "styleSource": "scss/laxar-headline-widget.scss",
 
    "features": {
       "$schema": "http://json-schema.org/draft-04/schema#",
@@ -92,8 +93,7 @@
                      "type": "string",
                      "format": "topic",
                      "axRole": "outlet",
-                     "description": "Topic name of the action to request taking upon button activation.",
-                     "required": true
+                     "description": "Topic name of the action to request taking upon button activation."
                   },
                   "accessKey": {
                      "type": "string",
