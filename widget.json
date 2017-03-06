@@ -7,8 +7,7 @@
    },
 
    "controls": [
-      "laxar-uikit/controls/i18n",
-      "laxar-button-list-control"
+      "laxar-i18n-control"
    ],
 
    "features": {
@@ -92,8 +91,7 @@
                      "type": "string",
                      "format": "topic",
                      "axRole": "outlet",
-                     "description": "Topic name of the action to request taking upon button activation.",
-                     "required": true
+                     "description": "Topic name of the action to request taking upon button activation."
                   },
                   "accessKey": {
                      "type": "string",
