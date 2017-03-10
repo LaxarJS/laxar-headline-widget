@@ -2,8 +2,10 @@
 
 ## Last Changes
 
+
+## v4.0.0-alpha.1
+
 - [#14](https://github.com/LaxarJS/ax-headline-widget/issues/14): removed references to laxar-i18n-control
-- [#16](https://github.com/LaxarJS/ax-headline-widget/issues/16): project: upgrade to LaxarJS v2
 
 
 ## v4.0.0-alpha.0
