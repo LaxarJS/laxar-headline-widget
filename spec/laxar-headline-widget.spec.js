@@ -66,6 +66,10 @@ describe( 'A laxar-headline-widget', () => {
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+      it( 'computes the localized headline', () => {
+         expect( axMocks.widget.$scope.model.headline.htmlText ).toEqual( 'Hello World' );
+      } );
+
       // R1.1, R1.2, R1.3: No complex UI tests for simple HTML markup with AngularJS directives.
 
    } );

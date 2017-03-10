@@ -41,13 +41,19 @@ const CONFIG_TO_BOOTSTRAP_SIZE_MAP = {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Controller.$inject = [ '$scope', 'axI18n' ];
+Controller.$inject = [ '$scope', 'axFeatures', 'axI18n' ];
 
-function Controller( $scope, i18n ) {
+function Controller( $scope, features, i18n ) {
 
    const flagHandler = patterns.flags.handlerFor( $scope );
 
    $scope.model = {
+      headline: {
+         htmlText: i18n.localize( features.headline.i18nHtmlText )
+      },
+      intro: {
+         htmlText: i18n.localize( features.intro.i18nHtmlText )
+      },
       areas: {
          left: getButtonList( 'LEFT' ),
          right: getButtonList( 'RIGHT' )
@@ -55,6 +61,8 @@ function Controller( $scope, i18n ) {
    };
 
    i18n.whenLocaleChanged( () => {
+      $scope.model.headline.htmlText = i18n.localize( features.headline.i18nHtmlText );
+      $scope.model.intro.htmlText = i18n.localize( features.intro.i18nHtmlText );
       $scope.model.areas.left.forEach( button => {
          button.htmlLabel = i18n.localize( button.i18nHtmlLabel );
       } );
@@ -81,7 +89,7 @@ function Controller( $scope, i18n ) {
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
    function getButtonList( alignKey ) {
-      return $scope.features.buttons
+      return features.buttons
          .filter( button => button.align === alignKey )
          .filter( button => button.enabled )
          .map( ( button, i ) => {
