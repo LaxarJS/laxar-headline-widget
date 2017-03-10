@@ -1,6 +1,6 @@
 {
   "name": "laxar-headline-widget",
-  "version": "4.0.0-pre",
+  "version": "4.0.0-alpha.0",
   "description": "AngularJS v1 widget that allows a user to trigger actions (such as navigation) using graphical buttons.",
   "homepage": "http://laxarjs.org",
   "main": "laxar-headline-widget.js",
