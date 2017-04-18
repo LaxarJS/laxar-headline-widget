@@ -4,13 +4,11 @@
  * http://laxarjs.org/license
  */
 import * as axMocks from 'laxar-mocks';
-import 'angular';
-import 'angular-mocks';
 import fixtures from './fixtures';
 
 let widgetEventBus;
-let widgetScope;
 let testEventBus;
+let widgetDom;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -29,10 +27,11 @@ function createSetup( widgetConfiguration ) {
    beforeEach( axMocks.widget.load );
 
    beforeEach( () => {
-      widgetScope = axMocks.widget.$scope;
       widgetEventBus = axMocks.widget.axEventBus;
       testEventBus = axMocks.eventBus;
    } );
+
+   beforeEach( () => { widgetDom = axMocks.widget.render(); } );
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -48,14 +47,16 @@ describe( 'A laxar-headline-widget', () => {
       createSetup( {
          headline: {
             i18nHtmlText: {
-               'de-DE': 'Hello World'
+               'de-DE': 'Hallo Welt',
+               'en-US': 'Hello World'
             },
             level: 4
          },
 
          intro: {
             i18nHtmlText: {
-               'de-DE': 'Welcome to the headline!'
+               'de-DE': 'Willkommen zur Kopfzeile!',
+               'en-US': 'Welcome to the headline!'
             }
          }
       } );
@@ -67,7 +68,9 @@ describe( 'A laxar-headline-widget', () => {
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       it( 'computes the localized headline', () => {
-         expect( axMocks.widget.$scope.model.headline.htmlText ).toEqual( 'Hello World' );
+         expect( widgetDom.querySelector( '.ax-local-text' ).innerHTML ).toEqual( 'Hallo Welt' );
+         useLocale( 'en-US' );
+         expect( widgetDom.querySelector( '.ax-local-text' ).innerHTML ).toEqual( 'Hello World' );
       } );
 
       // R1.1, R1.2, R1.3: No complex UI tests for simple HTML markup with AngularJS directives.
@@ -84,37 +87,36 @@ describe( 'A laxar-headline-widget', () => {
       createSetup( {
          headline: {
             i18nHtmlText: {
-               'de-DE': 'Überschrift',
+               'de-DE': 'Überschrifttest',
                'it-IT': 'Titolo',
-               'en-GB': 'Headline'
+               'en': 'Headline'
             }
          },
          buttons: [
-            { i18nHtmlLabel: { 'de-DE': 'A' }, action: 'actionA', index: 5, align: 'RIGHT' },
-            { i18nHtmlLabel: { 'de-DE': 'B' }, action: 'actionB' },
-            { i18nHtmlLabel: { 'de-DE': 'C' }, action: 'actionC', index: -2, align: 'RIGHT' },
-            { i18nHtmlLabel: { 'de-DE': 'D' }, action: 'actionD', index: 3, align: 'RIGHT' },
-            { i18nHtmlLabel: { 'de-DE': 'E' }, action: 'actionD', index: 0, align: 'RIGHT' },
-            { i18nHtmlLabel: { 'de-DE': 'F' }, action: 'actionA', index: 5, align: 'LEFT' },
-            { i18nHtmlLabel: { 'de-DE': 'G' }, action: 'actionB', align: 'LEFT' },
-            { i18nHtmlLabel: { 'de-DE': 'H' }, action: 'actionC', index: -2, align: 'LEFT' },
-            { i18nHtmlLabel: { 'de-DE': 'I' }, action: 'actionD', index: 3, align: 'LEFT' },
-            { i18nHtmlLabel: { 'de-DE': 'J' }, action: 'actionD', index: 0, align: 'LEFT' }
+            { i18nHtmlLabel: { 'en': 'A' }, action: 'actionA', index: 5, align: 'RIGHT' },
+            { i18nHtmlLabel: { 'en': 'B' }, action: 'actionB' },
+            { i18nHtmlLabel: { 'en': 'C' }, action: 'actionC', index: -2, align: 'RIGHT' },
+            { i18nHtmlLabel: { 'en': 'D' }, action: 'actionD', index: 3, align: 'RIGHT' },
+            { i18nHtmlLabel: { 'en': 'E' }, action: 'actionD', index: 0, align: 'RIGHT' },
+            { i18nHtmlLabel: { 'en': 'F' }, action: 'actionA', index: 5, align: 'LEFT' },
+            { i18nHtmlLabel: { 'en': 'G' }, action: 'actionB', align: 'LEFT' },
+            { i18nHtmlLabel: { 'en': 'H' }, action: 'actionC', index: -2, align: 'LEFT' },
+            { i18nHtmlLabel: { 'en': 'I' }, action: 'actionD', index: 3, align: 'LEFT' },
+            { i18nHtmlLabel: { 'en': 'J' }, action: 'actionD', index: 0, align: 'LEFT' }
          ]
       } );
 
       it( 'puts them into the correct areas (R3.2)', () => {
-         useLocale( 'de-DE' );
-         expect( widgetScope.model.areas.right[ 0 ].htmlLabel ).toEqual( 'C' );
-         expect( widgetScope.model.areas.right[ 1 ].htmlLabel ).toEqual( 'B' );
-         expect( widgetScope.model.areas.right[ 2 ].htmlLabel ).toEqual( 'E' );
-         expect( widgetScope.model.areas.right[ 3 ].htmlLabel ).toEqual( 'D' );
-         expect( widgetScope.model.areas.right[ 4 ].htmlLabel ).toEqual( 'A' );
-         expect( widgetScope.model.areas.left[ 0 ].htmlLabel ).toEqual( 'H' );
-         expect( widgetScope.model.areas.left[ 1 ].htmlLabel ).toEqual( 'G' );
-         expect( widgetScope.model.areas.left[ 2 ].htmlLabel ).toEqual( 'J' );
-         expect( widgetScope.model.areas.left[ 3 ].htmlLabel ).toEqual( 'I' );
-         expect( widgetScope.model.areas.left[ 4 ].htmlLabel ).toEqual( 'F' );
+         expect( widgetDom.querySelectorAll( '.btn' )[ 0 ].innerHTML ).toEqual( 'H' );
+         expect( widgetDom.querySelectorAll( '.btn' )[ 1 ].innerHTML ).toEqual( 'G' );
+         expect( widgetDom.querySelectorAll( '.btn' )[ 2 ].innerHTML ).toEqual( 'J' );
+         expect( widgetDom.querySelectorAll( '.btn' )[ 3 ].innerHTML ).toEqual( 'I' );
+         expect( widgetDom.querySelectorAll( '.btn' )[ 4 ].innerHTML ).toEqual( 'F' );
+         expect( widgetDom.querySelectorAll( '.btn' )[ 5 ].innerHTML ).toEqual( 'C' );
+         expect( widgetDom.querySelectorAll( '.btn' )[ 6 ].innerHTML ).toEqual( 'B' );
+         expect( widgetDom.querySelectorAll( '.btn' )[ 7 ].innerHTML ).toEqual( 'E' );
+         expect( widgetDom.querySelectorAll( '.btn' )[ 8 ].innerHTML ).toEqual( 'D' );
+         expect( widgetDom.querySelectorAll( '.btn' )[ 9 ].innerHTML ).toEqual( 'A' );
       } );
 
    } );
@@ -132,27 +134,31 @@ describe( 'A laxar-headline-widget', () => {
             i18nHtmlText: {
                'de-DE': 'Überschrift',
                'it-IT': 'Titolo',
-               'en-GB': 'Headline'
+               'en': 'Headline'
             }
          },
          buttons: [
-            { i18nHtmlLabel: { 'de-DE': 'A' }, action: 'actionA' },
-            { i18nHtmlLabel: { 'de-DE': 'B' }, action: 'actionB', enabled: false },
-            { i18nHtmlLabel: { 'de-DE': 'C' }, action: 'actionC', enabled: true },
-            { i18nHtmlLabel: { 'de-DE': 'D' }, action: 'actionD', enabled: false }
+            { i18nHtmlLabel: { 'en': 'A', 'de-DE': 'Ä' }, action: 'actionA' },
+            { i18nHtmlLabel: { 'en': 'O', 'de-DE': 'Ö' }, action: 'actionB', enabled: false },
+            { i18nHtmlLabel: { 'en': 'U', 'de-DE': 'Ü' }, action: 'actionC', enabled: true }
          ]
       } );
 
       it( 'excludes buttons that have been configured to be disabled (R3.5)', () => {
 
+         useLocale( 'en' );
+
+         expect( widgetDom.querySelectorAll( '.btn' )[ 0 ].innerHTML ).toEqual( 'A' );
+         expect( widgetDom.querySelectorAll( '.btn' )[ 1 ].innerHTML ).toEqual( 'U' );
+
+         expect( widgetDom.querySelectorAll( '.btn' ).length ).toBe( 2 );
+
          useLocale( 'de-DE' );
 
-         const modelButtons = widgetScope.model.areas.right;
+         expect( widgetDom.querySelectorAll( '.btn' )[ 0 ].innerHTML ).toEqual( 'Ä' );
+         expect( widgetDom.querySelectorAll( '.btn' )[ 1 ].innerHTML ).toEqual( 'Ü' );
 
-         expect( modelButtons[ 0 ].htmlLabel ).toEqual( 'A' );
-         expect( modelButtons[ 1 ].htmlLabel ).toEqual( 'C' );
-
-         expect( modelButtons.length ).toBe( 2 );
+         expect( widgetDom.querySelectorAll( '.btn' ).length ).toBe( 2 );
       } );
    } );
 
@@ -182,8 +188,9 @@ describe( 'A laxar-headline-widget', () => {
          useLocale( 'de-DE' );
 
          const buttonOrder = [ 15, 1, 2, 3, 4, 5, 10, 11, 6, 12, 13, 7, 14, 8, 9 ];
-         widgetScope.model.areas.right.forEach( ( button, i ) => {
-            expect( button.action ).toBe( `action${buttonOrder[ i ]}` );
+
+         buttonOrder.forEach( ( number, i ) => {
+            expect( widgetDom.querySelectorAll( '.btn' )[ i ].innerHTML ).toBe( `Action ${number}` );
          } );
       } );
    } );
@@ -216,26 +223,26 @@ describe( 'A laxar-headline-widget', () => {
 
          useLocale( 'de-DE' );
 
-         const modelButtons = widgetScope.model.areas.right;
+         const buttons = widgetDom.querySelectorAll( '.btn' );
 
-         expect( modelButtons[ 1 ].classes[ 'btn-primary' ] ).toBe( true );
-         expect( modelButtons[ 2 ].classes[ 'btn-info' ] ).toBe( true );
-         expect( modelButtons[ 3 ].classes[ 'btn-success' ] ).toBe( true );
-         expect( modelButtons[ 4 ].classes[ 'btn-warning' ] ).toBe( true );
-         expect( modelButtons[ 5 ].classes[ 'btn-danger' ] ).toBe( true );
-         expect( modelButtons[ 6 ].classes[ 'btn-link' ] ).toBe( true );
-         expect( modelButtons[ 7 ].classes[ 'btn-inverse' ] ).toBe( true );
+         expect( buttons[ 1 ].className ).toMatch( /btn btn-primary/ );
+         expect( buttons[ 2 ].className ).toMatch( /btn btn-info/ );
+         expect( buttons[ 3 ].className ).toMatch( /btn btn-success/ );
+         expect( buttons[ 4 ].className ).toMatch( /btn btn-warning/ );
+         expect( buttons[ 5 ].className ).toMatch( /btn btn-danger/ );
+         expect( buttons[ 6 ].className ).toMatch( /btn btn-link/ );
+         expect( buttons[ 7 ].className ).toMatch( /btn btn-inverse/ );
 
-         expect( modelButtons[ 0 ].classes[ 'btn-primary' ] ).toBeFalsy();
-         expect( modelButtons[ 0 ].classes[ 'btn-info' ] ).toBeFalsy();
-         expect( modelButtons[ 0 ].classes[ 'btn-success' ] ).toBeFalsy();
-         expect( modelButtons[ 0 ].classes[ 'btn-warning' ] ).toBeFalsy();
-         expect( modelButtons[ 0 ].classes[ 'btn-danger' ] ).toBeFalsy();
-         expect( modelButtons[ 0 ].classes[ 'btn-link' ] ).toBeFalsy();
-         expect( modelButtons[ 0 ].classes[ 'btn-inverse' ] ).toBeFalsy();
+         expect( buttons[ 0 ].className ).not.toMatch( /btn btn-primary/ );
+         expect( buttons[ 0 ].className ).not.toMatch( /btn btn-info/ );
+         expect( buttons[ 0 ].className ).not.toMatch( /btn btn-success/ );
+         expect( buttons[ 0 ].className ).not.toMatch( /btn btn-warning/ );
+         expect( buttons[ 0 ].className ).not.toMatch( /btn btn-danger/ );
+         expect( buttons[ 0 ].className ).not.toMatch( /btn btn-link/ );
+         expect( buttons[ 0 ].className ).not.toMatch( /btn btn-inverse/ );
 
-         expect( modelButtons[ 8 ].classes[ 'btn-success' ] ).toBeFalsy();
-         expect( modelButtons[ 5 ].classes[ 'btn-success' ] ).toBeFalsy();
+         expect( buttons[ 8 ].className ).not.toMatch( /btn btn-success/ );
+         expect( buttons[ 5 ].className ).not.toMatch( /btn btn-success/ );
       } );
    } );
 
@@ -263,19 +270,19 @@ describe( 'A laxar-headline-widget', () => {
 
          useLocale( 'de-DE' );
 
-         const modelButtons = widgetScope.model.areas.right;
+         const buttons = widgetDom.querySelectorAll( '.btn' );
 
-         expect( modelButtons[ 2 ].classes[ 'btn-xs' ] ).toBe( true );
-         expect( modelButtons[ 3 ].classes[ 'btn-sm' ] ).toBe( true );
-         expect( modelButtons[ 4 ].classes[ 'btn-lg' ] ).toBe( true );
+         expect( buttons[ 2 ].className ).toMatch( /btn btn-default btn-xs/ );
+         expect( buttons[ 3 ].className ).toMatch( /btn btn-default btn-sm/ );
+         expect( buttons[ 4 ].className ).toMatch( /btn btn-default btn-lg/ );
 
-         expect( modelButtons[ 0 ].classes[ 'btn-xs' ] ).toBeFalsy();
-         expect( modelButtons[ 0 ].classes[ 'btn-sm' ] ).toBeFalsy();
-         expect( modelButtons[ 0 ].classes[ 'btn-lg' ] ).toBeFalsy();
+         expect( buttons[ 0 ].className ).not.toMatch( /btn btn-default btn-xs/ );
+         expect( buttons[ 0 ].className ).not.toMatch( /btn btn-default btn-sm/ );
+         expect( buttons[ 0 ].className ).not.toMatch( /btn btn-default btn-lg/ );
 
-         expect( modelButtons[ 1 ].classes[ 'btn-xs' ] ).toBeFalsy();
-         expect( modelButtons[ 1 ].classes[ 'btn-sm' ] ).toBeFalsy();
-         expect( modelButtons[ 1 ].classes[ 'btn-lg' ] ).toBeFalsy();
+         expect( buttons[ 1 ].className ).not.toMatch( /btn btn-default btn-xs/ );
+         expect( buttons[ 1 ].className ).not.toMatch( /btn btn-default btn-sm/ );
+         expect( buttons[ 1 ].className ).not.toMatch( /btn btn-default btn-lg/ );
       } );
    } );
 
@@ -324,7 +331,7 @@ describe( 'A laxar-headline-widget', () => {
             actionRequestSpy = jasmine.createSpy( 'takeActionRequestSpy' );
             widgetEventBus.subscribe( 'takeActionRequest', actionRequestSpy );
 
-            buttons = widgetScope.model.areas.right;
+            buttons = widgetDom.querySelectorAll( '.btn' );
 
             changeFlagAndFlush( 'helpAvailable', true );
          } );
@@ -332,20 +339,20 @@ describe( 'A laxar-headline-widget', () => {
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'on true the according css classes are applied (R3.11, R.12)', () => {
-            expect( buttons[ 1 ].classes[ 'ax-invisible' ] ).toBe( false );
-            expect( buttons[ 1 ].classes[ 'ax-busy' ] ).toBe( false );
-            expect( buttons[ 2 ].classes[ 'ax-omitted' ] ).toBe( false );
-            expect( buttons[ 0 ].classes[ 'ax-disabled' ] ).toBe( false );
+            expect( buttons[ 1 ].className ).not.toMatch( /ax-invisible/ );
+            expect( buttons[ 1 ].className ).not.toMatch( /ax-busy/ );
+            expect( buttons[ 2 ].className ).not.toMatch( /ax-omitted/ );
+            expect( buttons[ 0 ].className ).not.toMatch( /ax-disabled/ );
 
             changeFlagAndFlush( 'guestUser', true );
             changeFlagAndFlush( 'navigation', true );
             changeFlagAndFlush( 'helpAvailable', false );
             changeFlagAndFlush( 'notUndoable', true );
 
-            expect( buttons[ 1 ].classes[ 'ax-invisible' ] ).toBe( true );
-            expect( buttons[ 1 ].classes[ 'ax-busy' ] ).toBe( true );
-            expect( buttons[ 2 ].classes[ 'ax-omitted' ] ).toBe( true );
-            expect( buttons[ 0 ].classes[ 'ax-disabled' ] ).toBe( true );
+            expect( buttons[ 1 ].className ).toMatch( /ax-invisible/ );
+            expect( buttons[ 1 ].className ).toMatch( /ax-busy/ );
+            expect( buttons[ 2 ].className ).toMatch( /ax-omitted/ );
+            expect( buttons[ 0 ].className ).toMatch( /ax-disabled/ );
          } );
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -362,28 +369,28 @@ describe( 'A laxar-headline-widget', () => {
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'on false the according css classes are removed (R3.11, R3.12)', () => {
-               expect( buttons[ 1 ].classes[ 'ax-invisible' ] ).toBe( true );
-               expect( buttons[ 1 ].classes[ 'ax-busy' ] ).toBe( true );
-               expect( buttons[ 2 ].classes[ 'ax-omitted' ] ).toBe( true );
-               expect( buttons[ 0 ].classes[ 'ax-disabled' ] ).toBe( true );
+               expect( buttons[ 1 ].className ).toMatch( /ax-invisible/ );
+               expect( buttons[ 1 ].className ).toMatch( /ax-busy/ );
+               expect( buttons[ 2 ].className ).toMatch( /ax-omitted/ );
+               expect( buttons[ 0 ].className ).toMatch( /ax-disabled/ );
 
                changeFlagAndFlush( 'guestUser', false );
                changeFlagAndFlush( 'navigation', false );
                changeFlagAndFlush( 'helpAvailable', true );
                changeFlagAndFlush( 'notUndoable', false );
 
-               expect( buttons[ 1 ].classes[ 'ax-invisible' ] ).toBe( false );
-               expect( buttons[ 1 ].classes[ 'ax-busy' ] ).toBe( false );
-               expect( buttons[ 2 ].classes[ 'ax-omitted' ] ).toBe( false );
-               expect( buttons[ 0 ].classes[ 'ax-disabled' ] ).toBe( false );
+               expect( buttons[ 1 ].className ).not.toMatch( /ax-invisible/ );
+               expect( buttons[ 1 ].className ).not.toMatch( /ax-busy/ );
+               expect( buttons[ 2 ].className ).not.toMatch( /ax-omitted/ );
+               expect( buttons[ 0 ].className ).not.toMatch( /ax-disabled/ );
             } );
 
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'no user interaction is possible', () => {
-               widgetScope.handleButtonClicked( buttons[ 0 ] );
-               widgetScope.handleButtonClicked( buttons[ 1 ] );
-               widgetScope.handleButtonClicked( buttons[ 2 ] );
+               fireEvent( buttons[ 0 ], 'click' );
+               fireEvent( buttons[ 1 ], 'click' );
+               fireEvent( buttons[ 2 ], 'click' );
                testEventBus.flush();
 
                expect( actionRequestSpy.calls.count() ).toBe( 0 );
@@ -397,9 +404,9 @@ describe( 'A laxar-headline-widget', () => {
                changeFlagAndFlush( 'helpAvailable', true );
                changeFlagAndFlush( 'notUndoable', false );
 
-               widgetScope.handleButtonClicked( buttons[ 0 ] );
-               widgetScope.handleButtonClicked( buttons[ 1 ] );
-               widgetScope.handleButtonClicked( buttons[ 2 ] );
+               fireEvent( buttons[ 0 ], 'click' );
+               fireEvent( buttons[ 1 ], 'click' );
+               fireEvent( buttons[ 2 ], 'click' );
                testEventBus.flush();
 
                expect( actionRequestSpy.calls.count() ).toBe( 3 );
@@ -411,6 +418,7 @@ describe( 'A laxar-headline-widget', () => {
 
       describe( 'when a button is pressed', () => {
          let spy;
+         let button;
          let buttons;
 
          beforeEach( () => {
@@ -442,7 +450,8 @@ describe( 'A laxar-headline-widget', () => {
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'publishes a takeActionRequest for the configured action (R3.13)', () => {
-            widgetScope.handleButtonClicked( widgetScope.model.areas.right[ 0 ] );
+            button = widgetDom.querySelector( '.btn' );
+            fireEvent( button, 'click' );
             testEventBus.flush();
 
             expect( spy ).toHaveBeenCalled();
@@ -453,36 +462,37 @@ describe( 'A laxar-headline-widget', () => {
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'sends the button\'s id as event.anchorDomElement (R3.13)', () => {
-            widgetScope.handleButtonClicked( widgetScope.model.areas.right[ 0 ] );
+            button = widgetDom.querySelector( '.btn' );
+            fireEvent( button, 'click' );
             testEventBus.flush();
-
-            expect( spy.calls.argsFor( 0 )[ 0 ].anchorDomElement ).toEqual( widgetScope.id( 'actionY_0' ) );
+            expect( spy.calls.argsFor( 0 )[ 0 ].anchorDomElement ).toMatch( /actionY_0/ );
          } );
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'has individual ids for each button (R3.13)', () => {
-            expect( widgetScope.model.areas.right[ 0 ].id )
-               .not.toEqual( widgetScope.model.areas.right[ 1 ].id );
+            button = widgetDom.querySelectorAll( '.btn' );
+            expect( button[ 0 ].id )
+               .not.toEqual( button[ 1 ].id );
          } );
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'assigns the CSS class "ax-active" to a button while its action is processed (R3.14)', done => {
-            const modelButton = widgetScope.model.areas.right[ 0 ];
+            button = widgetDom.querySelector( '.btn' );
 
             testEventBus.subscribe( 'takeActionRequest.actionY', () => {
                testEventBus.publish( 'willTakeAction.actionY', { action: 'actionY' }, { sender: 'spec' } );
             } );
 
-            widgetScope.handleButtonClicked( modelButton );
+            fireEvent( button, 'click' );
             testEventBus.flush();
-            expect( modelButton.classes[ 'ax-active' ] ).toBe( true );
+            expect( button.className ).toMatch( /ax-active/ );
 
             testEventBus.publish( 'didTakeAction.actionY', { action: 'actionY' }, { sender: 'spec' } );
             testEventBus.flush();
             awaitGatherReplies().then( () => {
-               expect( modelButton.classes[ 'ax-active' ] ).toBe( false );
+               expect( button.className ).not.toMatch( /ax-active/ );
                done();
             } );
          } );
@@ -490,18 +500,17 @@ describe( 'A laxar-headline-widget', () => {
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          describe( 'and the action is canceled', () => {
-            let modelButton;
+            let button;
             beforeEach( () => {
-               modelButton = widgetScope.model.areas.right[ 0 ];
+               button = widgetDom.querySelector( '.btn' );
                widgetEventBus.publishAndGatherReplies.and.callFake( () => Promise.reject() );
-               widgetScope.handleButtonClicked( modelButton );
+               fireEvent( button, 'click' );
             } );
 
             it( 'resets the button state (R3.14)', done => {
-               expect( modelButton.classes[ 'ax-active' ] ).toBe( true );
-               widgetScope.$apply();
+               expect( button.className ).toMatch( /ax-active/ );
                awaitGatherReplies().then( () => {
-                  expect( modelButton.classes[ 'ax-active' ] ).toBe( false );
+                  expect( button.className ).not.toMatch( /ax-active/ );
                   done();
                } );
             } );
@@ -545,19 +554,19 @@ describe( 'A laxar-headline-widget', () => {
             changeFlag( 'helpAvailable', true );
             changeFlag( 'notUndoable', true );
 
-            const modelButton = widgetScope.model.areas.right[ 0 ];
+            const button = widgetDom.querySelector( '.btn' );
 
-            expect( modelButton.classes[ 'ax-invisible' ] ).toBe( false );
-            expect( modelButton.classes[ 'ax-busy' ] ).toBe( false );
-            expect( modelButton.classes[ 'ax-omitted' ] ).toBe( false );
-            expect( modelButton.classes[ 'ax-disabled' ] ).toBe( false );
+            expect( button.className ).not.toMatch( 'ax-invisible' );
+            expect( button.className ).not.toMatch( 'ax-busy' );
+            expect( button.className ).not.toMatch( 'ax-omitted' );
+            expect( button.className ).not.toMatch( 'ax-disabled' );
 
             testEventBus.flush();
 
-            expect( modelButton.classes[ 'ax-invisible' ] ).toBe( true );
-            expect( modelButton.classes[ 'ax-busy' ] ).toBe( true );
-            expect( modelButton.classes[ 'ax-omitted' ] ).toBe( false );
-            expect( modelButton.classes[ 'ax-disabled' ] ).toBe( true );
+            expect( button.className ).toMatch( 'ax-invisible' );
+            expect( button.className ).toMatch( 'ax-busy' );
+            expect( button.className ).not.toMatch( 'ax-omitted' );
+            expect( button.className ).toMatch( 'ax-disabled' );
 
             changeFlag( 'guestUser', false );
             changeFlag( 'navigation', false );
@@ -566,22 +575,23 @@ describe( 'A laxar-headline-widget', () => {
 
             testEventBus.flush();
 
-            expect( modelButton.classes[ 'ax-invisible' ] ).toBe( false );
-            expect( modelButton.classes[ 'ax-busy' ] ).toBe( false );
-            expect( modelButton.classes[ 'ax-omitted' ] ).toBe( true );
-            expect( modelButton.classes[ 'ax-disabled' ] ).toBe( false );
+            expect( button.className ).not.toMatch( 'ax-invisible' );
+            expect( button.className ).not.toMatch( 'ax-busy' );
+            expect( button.className ).toMatch( 'ax-omitted' );
+            expect( button.className ).not.toMatch( 'ax-disabled' );
          } );
 
          /////////////////////////////////////////////////////////////////////////////////////////////////////
 
          it( 'if the flag is true, no user interaction is possible (R3.11)', () => {
             const spy = jasmine.createSpy( 'takeActionRequestSpy' );
+            const button = widgetDom.querySelector( '.btn' );
             widgetEventBus.subscribe( 'takeActionRequest', spy );
 
             changeFlag( 'guestUser', true );
             testEventBus.flush();
 
-            widgetScope.handleButtonClicked( widgetScope.model.areas.right[ 0 ] );
+            fireEvent( button, 'click' );
             testEventBus.flush();
 
             expect( spy.calls.count() ).toBe( 0 );
@@ -591,12 +601,13 @@ describe( 'A laxar-headline-widget', () => {
 
          it( 'if the flag is false user interactions will be processed again (R3.11)', () => {
             const spy = jasmine.createSpy( 'takeActionRequestSpy' );
+            const button = widgetDom.querySelector( '.btn' );
             widgetEventBus.subscribe( 'takeActionRequest', spy );
 
             changeFlag( 'guestUser', false );
             testEventBus.flush();
 
-            widgetScope.handleButtonClicked( widgetScope.model.areas.right[ 0 ] );
+            fireEvent( button, 'click' );
             testEventBus.flush();
 
             expect( spy.calls.count() ).toBe( 1 );
@@ -633,11 +644,67 @@ describe( 'A laxar-headline-widget', () => {
       } );
 
       it( 'selects the HTML label based on the current locale (R4.1)', () => {
-         useLocale( 'it' );
-         expect( widgetScope.model.areas.right[ 0 ].htmlLabel ).toEqual( button.i18nHtmlLabel.it );
+         const domButton = widgetDom.querySelector( '.btn' );
+         useLocale( 'it-IT' );
+         expect( domButton.innerHTML ).toEqual( button.i18nHtmlLabel[ 'it-IT' ] );
 
          useLocale( 'en-US' );
-         expect( widgetScope.model.areas.right[ 0 ].htmlLabel ).toEqual( button.i18nHtmlLabel[ 'en-US' ] );
+         expect( domButton.innerHTML ).toEqual( button.i18nHtmlLabel[ 'en-US' ] );
+      } );
+
+   } );
+
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   describe( 'with configured intro', () => {
+      createSetup( () => {
+         return {
+            headline: {
+               i18nHtmlText: {
+                  'en-US': 'Headline',
+                  'de-DE': 'Überschrift'
+               }
+            },
+            intro: {
+               i18nHtmlText: {
+                  'en-US': 'This is a intro text.',
+                  'de-DE': 'Dies ist ein Introtext.'
+               }
+            }
+         };
+      } );
+
+      it( 'does create an intro div and selects the HTML text based on the current locale (R4.1)', () => {
+         const domIntro = widgetDom.querySelector( '.ax-local-intro-text' );
+         expect( domIntro ).not.toBe( null );
+
+         useLocale( 'en-US' );
+         expect( domIntro.innerHTML ).toEqual( 'This is a intro text.' );
+
+         useLocale( 'de-DE' );
+         expect( domIntro.innerHTML ).toEqual( 'Dies ist ein Introtext.' );
+      } );
+
+   } );
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   describe( 'with no configured intro', () => {
+      createSetup( () => {
+         return {
+            headline: {
+               i18nHtmlText: {
+                  'en-US': 'Headline',
+                  'de-DE': 'Überschrift'
+               }
+            }
+         };
+      } );
+
+      it( 'does NOT create an intro div', () => {
+         const domIntro = widgetDom.querySelector( '.ax-local-intro-text' );
+         expect( domIntro ).toBe( null );
       } );
 
    } );
@@ -662,4 +729,15 @@ function changeFlag( flag, state, sender = 'spec' ) {
 function changeFlagAndFlush( flag, state, sender = 'spec' ) {
    testEventBus.publish( `didChangeFlag.${flag}.${state}`, { flag, state }, { sender } );
    testEventBus.flush();
+}
+
+function fireEvent(el, etype){
+   if(el.fireEvent) {
+      el.fireEvent(`on${etype}`);
+   }
+   else {
+      const evObj = document.createEvent('Events');
+      evObj.initEvent(etype, true, false);
+      el.dispatchEvent(evObj);
+   }
 }
