@@ -1,77 +1,237 @@
 /**
  * Copyright 2017
  */
-//import * as ax from 'laxar';
-//import * as patterns from 'laxar-patterns';
-export const injections = [ 'axWithDom', 'axFeatures', 'axEventBus', 'axI18n', 'axContext' ];
-export function create( axWithDom, features/*, eventBus, axI18n, context*/ ) {
+const BUTTON_STANDART_CLASS = 'btn';
+const BUTTON_CLASS_PREFIX = 'btn-';
+const BUTTON_CLASS_ACTIVE = 'ax-active';
+const BUTTON_CLASS_HIDDEN = 'ax-invisible';
+const BUTTON_CLASS_OMITTED = 'ax-omitted';
+const BUTTON_CLASS_BUSY = 'ax-busy';
+const BUTTON_CLASS_DISABLED = 'ax-disabled';
 
-   // patterns.resources.handlerFor( context ).registerResourceFromFeature( 'content', {
-   //    onUpdateReplace() {
-   //       try {
-   //          updateView();
-   //       }
-   //       finally { /*DO NOTHING*/ }
-   //    }
-   // } );
+const BUTTON_STATE_TRIGGER_TO_CLASS_MAP = {
+   hideOn: BUTTON_CLASS_HIDDEN,
+   omitOn: BUTTON_CLASS_OMITTED,
+   disableOn: BUTTON_CLASS_DISABLED,
+   busyOn: BUTTON_CLASS_BUSY
+};
+
+const CONFIG_TO_BOOTSTRAP_STYLE_MAP = {
+   NORMAL: 'default',
+   PRIMARY: 'primary',
+   INFO: 'info',
+   SUCCESS: 'success',
+   WARNING: 'warning',
+   DANGER: 'danger',
+   INVERSE: 'inverse',
+   LINK: 'link'
+};
+
+const CONFIG_TO_BOOTSTRAP_SIZE_MAP = {
+   MINI: 'xs',
+   SMALL: 'sm',
+   LARGE: 'lg'
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+import * as patterns from 'laxar-patterns';
+export const injections = [ 'axWithDom', 'axFeatures', 'axEventBus', 'axI18n', 'axContext', 'axId' ];
+export function create( axWithDom, features, eventBus, i18n, context, axId ) {
+   const flagHandler = patterns.flags.handlerFor( context );
+
+   const model = {
+      headline: {
+         htmlText: i18n.localize( features.headline.i18nHtmlText )
+      },
+      intro: {
+         htmlText: i18n.localize( features.intro.i18nHtmlText )
+      },
+      areas: {
+         left: getButtonList( 'LEFT' ),
+         right: getButtonList( 'RIGHT' )
+      }
+   };
+
+   i18n.whenLocaleChanged( () => {
+      model.headline.htmlText = i18n.localize( features.headline.i18nHtmlText );
+      model.intro.htmlText = i18n.localize( features.intro.i18nHtmlText );
+      model.areas.left.forEach( button => {
+         button.htmlLabel = i18n.localize( button.i18nHtmlLabel );
+      } );
+      model.areas.right.forEach( button => {
+         button.htmlLabel = i18n.localize( button.i18nHtmlLabel );
+      } );
+   } );
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   //axI18n.whenLocaleChanged( updateView );
+   function handleButtonClicked({ classes, action, id }) {
+      const shouldCancel = Object.keys( BUTTON_STATE_TRIGGER_TO_CLASS_MAP )
+         .some( stateTrigger => classes[ BUTTON_STATE_TRIGGER_TO_CLASS_MAP[ stateTrigger ] ] );
+      if( shouldCancel ) { return; }
+
+      classes[ BUTTON_CLASS_ACTIVE ] = true;
+      updateClasses( id, classes );
+      function reset() {
+         classes[ BUTTON_CLASS_ACTIVE ] = false;
+         updateClasses( id, classes );
+      }
+
+      eventBus
+         .publishAndGatherReplies( `takeActionRequest.${action}`, { action, anchorDomElement: id } )
+         .then( reset, reset );
+   }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   function updateView() {
-      axWithDom( element => {
-         console.log( 'It works?' );
+   function getButtonList( alignKey ) {
+      return features.buttons
+         .filter( button => button.align === alignKey )
+         .filter( button => button.enabled )
+         .map( ( button, i ) => {
+            button.fallbackIndex = i;
+            button.id = axId( `${button.action}_${i}` );
+            button.htmlLabel = i18n.localize( button.i18nHtmlLabel );
+            button.classes = buttonStyleClasses( button );
 
-         //remove all childs
-         while( element.firstChild ){
-            element.removeChild( element.firstChild );
+            Object.keys( BUTTON_STATE_TRIGGER_TO_CLASS_MAP ).forEach( stateTrigger => {
+               const className = BUTTON_STATE_TRIGGER_TO_CLASS_MAP[ stateTrigger ];
+               flagHandler.registerFlag( button[ stateTrigger ], {
+                  initialState: false,
+                  onChange( newState ) {
+                     button.classes[ className ] = newState;
+                     updateClasses( button.id, button.classes );
+                  }
+               } );
+            } );
+
+            return button;
+         } )
+         .sort( ( buttonA, buttonB ) =>
+            buttonA.index === buttonB.index ?
+               buttonA.fallbackIndex - buttonB.fallbackIndex :
+               buttonA.index - buttonB.index );
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function buttonStyleClasses( buttonConfiguration ) {
+      const classes = {};
+      classes[ BUTTON_CLASS_ACTIVE ] = false;
+      classes[ BUTTON_CLASS_HIDDEN ] = false;
+      classes[ BUTTON_CLASS_DISABLED ] = false;
+      classes[ BUTTON_CLASS_OMITTED ] = false;
+      classes[ BUTTON_CLASS_BUSY ] = false;
+
+      const buttonClass = buttonConfiguration[ 'class' ];
+      if( buttonClass ) {
+         const typePart =
+            CONFIG_TO_BOOTSTRAP_STYLE_MAP[ buttonClass ] ||
+            CONFIG_TO_BOOTSTRAP_STYLE_MAP.NORMAL;
+         const styleClass = BUTTON_CLASS_PREFIX + typePart;
+         classes[ styleClass ] = true;
+      }
+
+      const { size = 'DEFAULT' } = buttonConfiguration;
+      if( size !== 'DEFAULT' ) {
+         const sizeClass = BUTTON_CLASS_PREFIX + CONFIG_TO_BOOTSTRAP_SIZE_MAP[ size ];
+         classes[ sizeClass ] = true;
+      }
+
+      return classes;
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function updateClasses( id, classes ){
+      const element = document.getElementById( id );
+      if( !element ) { return; }
+      element.className = returnCssClasses(classes);
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function returnCssClasses( classes ){
+      let res = BUTTON_STANDART_CLASS;
+      const keys = Object.keys( classes );
+      keys.forEach( className => {
+         if( classes[ className ] ){
+            res += ' ';
+            res += className;
          }
+      } );
+      return res;
+   }
 
-         //create childs
-         for( let i = 1; i <= 6; i++ ){
-            if( features.headline.i18nHtmlText && features.headline.level == i ) {
-               const header = document.createElement( `H${i}` );
-               const wrapper = document.createElement( 'DIV' );
-               const buttonsRightDiv = document.createElement( 'DIV' );
-               const buttonsLeftDiv = document.createElement( 'DIV' );
-               const textDiv = document.createElement( 'DIV' );
-               const text = document.createTextNode( features.headline.i18nHtmlText[ 'en-US' ] );
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-               //ax-local-wrapper-left div
-               wrapper.appendChild( buttonsLeftDiv );
-               textDiv.appendChild( text );
-               wrapper.appendChild( textDiv );
-               wrapper.className = 'ax-local-wrapper-left';
-               buttonsLeftDiv.className = 'ax-local-buttons-left';
-               textDiv.className = 'ax-local-text';
-
-               //ax-local-buttons-right div
-               buttonsRightDiv.className = 'ax-local-buttons-right';
-
-               //header
-               header.appendChild( wrapper );
-               header.appendChild( buttonsRightDiv );
-
-               //element
-               element.appendChild( header );
-            }
-         }
-
-         //create intro (if needed)
-         // if( features.intro.i18nHtmlText ){
-         //    const introDiv = element.createElement( 'DIV' );
-         //    const text = element.createTextNode( model.intro.htmlText );
-         //    introDiv.className = 'ax-local-intro-text';
-         //    introDiv.appendChild( text );
-         //    element.appendChild( introDiv );
-         // }
+   function createButtons( target, buttons ){
+      buttons.forEach( ( button, i ) => {
+         const btn = document.createElement( 'BUTTON' );
+         const text = document.createTextNode( buttons[ i ].htmlLabel );
+         btn.appendChild( text );
+         btn.id = button.id;
+         btn.className = returnCssClasses( button.classes );
+         btn.onclick = () => {
+            handleButtonClicked( { classes: button.classes, action: button.action, id: button.id } );
+         };
+         btn.type = 'button';
+         target.appendChild( btn );
       } );
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   return { onDomAvailable: updateView };
+   function initialize() {
+      axWithDom( element => {
+         //create childs
+         if( features.headline.i18nHtmlText ) {
+            const header = document.createElement( `H${features.headline.level}` );
+            const wrapper = document.createElement( 'DIV' );
+            const buttonsRightDiv = document.createElement( 'DIV' );
+            const buttonsLeftDiv = document.createElement( 'DIV' );
+            const textDiv = document.createElement( 'DIV' );
+            const text = document.createTextNode( features.headline.i18nHtmlText[ 'en-US' ] );
+
+            //ax-local-wrapper-left div
+            wrapper.appendChild( buttonsLeftDiv );
+            textDiv.appendChild( text );
+            wrapper.appendChild( textDiv );
+            wrapper.className = 'ax-local-wrapper-left';
+            buttonsLeftDiv.className = 'ax-local-buttons-left';
+            textDiv.className = 'ax-local-text';
+
+            //ax-local-buttons-right div
+            buttonsRightDiv.className = 'ax-local-buttons-right';
+            createButtons( buttonsRightDiv, model.areas.right );
+
+            //ax-local-buttons-left
+            buttonsLeftDiv.className = 'ax-local-buttons-left';
+            createButtons( buttonsLeftDiv, model.areas.left );
+
+            //header
+            header.appendChild( wrapper );
+            header.appendChild( buttonsRightDiv );
+
+            //element
+            element.appendChild( header );
+         }
+
+         //create intro (if needed)
+         if( features.intro.i18nHtmlText ){
+            const introDiv = document.createElement( 'DIV' );
+            const text = document.createTextNode( features.intro.i18nHtmlText[ 'en-US' ] );
+            introDiv.className = 'ax-local-intro-text';
+            introDiv.appendChild( text );
+            element.appendChild( introDiv );
+         }
+      } );
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   return { onDomAvailable: initialize };
+
+
 }
