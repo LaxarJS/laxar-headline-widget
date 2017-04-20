@@ -1,5 +1,7 @@
 /**
- * Copyright 2017
+  * Copyright 2015-2017 aixigo AG
+  * Released under the MIT license
+  * www.laxarjs.org
  */
 const BUTTON_STANDART_CLASS = 'btn';
 const BUTTON_CLASS_PREFIX = 'btn-';

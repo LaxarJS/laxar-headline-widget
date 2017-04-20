@@ -4,8 +4,6 @@
  * http://laxarjs.org/license
  */
 import * as axMocks from 'laxar-mocks';
-import 'angular';
-import 'angular-mocks';
 import fixtures from './fixtures';
 
 let widgetEventBus;
