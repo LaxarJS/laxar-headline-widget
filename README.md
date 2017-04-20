@@ -38,7 +38,7 @@ An laxar-headline-widget with a headline with level 6 and a button with a icon o
 ## Usage
 
 ### Installation
-For installation instruction take a look at the [LaxarJS documentation](https://github.com/LaxarJS/laxar/blob/master/docs/manuals/installing_widgets.md).
+For installation instruction take a look at the [LaxarJS documentation](http://laxarjs.org/docs/laxar-v2-latest/manuals/installing_widgets/).
 
 
 ### Configuration example
@@ -173,6 +173,6 @@ Refer to the bower.json for the specific version that is normative for this docu
 * [LaxarJS Patterns]
 * [LaxarJS i18n]
 
-[LaxarJS Concepts]: https://github.com/LaxarJS/laxar/blob/master/docs/concepts.md "LaxarJS Concepts"
-[LaxarJS Patterns]: https://github.com/LaxarJS/laxar_patterns/blob/master/docs/index.md "LaxarJS Patterns"
-[LaxarJS i18n]: https://github.com/LaxarJS/laxar/blob/master/docs/manuals/i18n.md "LaxarJS i18n"
+[LaxarJS Concepts]: http://laxarjs.org/docs/laxar-v2-latest/concepts/ "LaxarJS Concepts"
+[LaxarJS Patterns]: http://laxarjs.org/docs/laxar-patterns-v2-latest/ "LaxarJS Patterns"
+[LaxarJS i18n]: http://laxarjs.org/docs/laxar-v2-latest/manuals/i18n/ "LaxarJS i18n"

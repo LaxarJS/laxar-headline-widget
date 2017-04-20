@@ -1,13 +1,9 @@
 /**
- * Copyright 2015-2017 aixigo AG
- * Released under the MIT license
- * www.laxarjs.org
+  * Copyright 2015-2017 aixigo AG
+  * Released under the MIT license
+  * www.laxarjs.org
  */
-import * as ng from 'angular';
-import * as patterns from 'laxar-patterns';
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+const BUTTON_STANDART_CLASS = 'btn';
 const BUTTON_CLASS_PREFIX = 'btn-';
 const BUTTON_CLASS_ACTIVE = 'ax-active';
 const BUTTON_CLASS_HIDDEN = 'ax-invisible';
@@ -41,18 +37,19 @@ const CONFIG_TO_BOOTSTRAP_SIZE_MAP = {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Controller.$inject = [ '$scope', 'axFeatures', 'axI18n' ];
+import * as patterns from 'laxar-patterns';
+export const injections = [ 'axWithDom', 'axFeatures', 'axEventBus', 'axI18n', 'axContext', 'axId' ];
+export function create( axWithDom, features, eventBus, i18n, context, axId ) {
+   const flagHandler = patterns.flags.handlerFor( context );
 
-function Controller( $scope, features, i18n ) {
-
-   const flagHandler = patterns.flags.handlerFor( $scope );
-
-   $scope.model = {
+   const model = {
       headline: {
-         htmlText: i18n.localize( features.headline.i18nHtmlText )
+         htmlText: i18n.localize( features.headline.i18nHtmlText ),
+         id: axId( 'headline' )
       },
       intro: {
-         htmlText: i18n.localize( features.intro.i18nHtmlText )
+         htmlText: i18n.localize( features.intro.i18nHtmlText ),
+         id: axId( 'intro' )
       },
       areas: {
          left: getButtonList( 'LEFT' ),
@@ -61,30 +58,35 @@ function Controller( $scope, features, i18n ) {
    };
 
    i18n.whenLocaleChanged( () => {
-      $scope.model.headline.htmlText = i18n.localize( features.headline.i18nHtmlText );
-      $scope.model.intro.htmlText = i18n.localize( features.intro.i18nHtmlText );
-      $scope.model.areas.left.forEach( button => {
-         button.htmlLabel = i18n.localize( button.i18nHtmlLabel );
+      model.headline.htmlText = i18n.localize( features.headline.i18nHtmlText ) || '';
+      model.intro.htmlText = i18n.localize( features.intro.i18nHtmlText ) || '';
+      model.areas.left.forEach( button => {
+         button.htmlLabel = i18n.localize( button.i18nHtmlLabel ) || '';
       } );
-      $scope.model.areas.right.forEach( button => {
-         button.htmlLabel = i18n.localize( button.i18nHtmlLabel );
+      model.areas.right.forEach( button => {
+         button.htmlLabel = i18n.localize( button.i18nHtmlLabel ) || '';
       } );
+      updateText();
    } );
 
-   $scope.handleButtonClicked = ({ classes, action, id }) => {
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function handleButtonClicked({ classes, action, id }) {
       const shouldCancel = Object.keys( BUTTON_STATE_TRIGGER_TO_CLASS_MAP )
          .some( stateTrigger => classes[ BUTTON_STATE_TRIGGER_TO_CLASS_MAP[ stateTrigger ] ] );
       if( shouldCancel ) { return; }
 
       classes[ BUTTON_CLASS_ACTIVE ] = true;
+      updateClasses( id, classes );
       function reset() {
          classes[ BUTTON_CLASS_ACTIVE ] = false;
+         updateClasses( id, classes );
       }
 
-      $scope.eventBus
+      eventBus
          .publishAndGatherReplies( `takeActionRequest.${action}`, { action, anchorDomElement: id } )
          .then( reset, reset );
-   };
+   }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -94,7 +96,7 @@ function Controller( $scope, features, i18n ) {
          .filter( button => button.enabled )
          .map( ( button, i ) => {
             button.fallbackIndex = i;
-            button.id = $scope.id( `${button.action}_${i}` );
+            button.id = axId( `${button.action}_${i}` );
             button.htmlLabel = i18n.localize( button.i18nHtmlLabel );
             button.classes = buttonStyleClasses( button );
 
@@ -104,6 +106,7 @@ function Controller( $scope, features, i18n ) {
                   initialState: false,
                   onChange( newState ) {
                      button.classes[ className ] = newState;
+                     updateClasses( button.id, button.classes );
                   }
                } );
             } );
@@ -144,8 +147,108 @@ function Controller( $scope, features, i18n ) {
       return classes;
    }
 
-}
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-export const name = ng.module( 'laxarHeadlineWidget', [] )
-   .controller( 'LaxarHeadlineWidgetController', Controller )
-   .name;
+   function updateClasses( id, classes ){
+      const element = document.getElementById( id );
+      if( !element ) { return; }
+      element.className = returnCssClasses(classes);
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function returnCssClasses( classes ){
+      let res = BUTTON_STANDART_CLASS;
+      const keys = Object.keys( classes );
+      keys.forEach( className => {
+         if( classes[ className ] ){
+            res += ' ';
+            res += className;
+         }
+      } );
+      return res;
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function updateText(){
+      if( document.querySelector( `#${model.headline.id}` ) ) {
+         document.querySelector( `#${model.headline.id}` ).innerHTML = model.headline.htmlText;
+         if( document.querySelector( `#${model.intro.id}` ) ) {
+            document.querySelector( `#${model.intro.id}` ).innerHTML = model.intro.htmlText;
+         }
+         model.areas.left.forEach(button => {
+            document.querySelector( `#${button.id}` ).innerHTML = button.htmlLabel;
+         } );
+         model.areas.right.forEach(button => {
+            document.querySelector( `#${button.id}` ).innerHTML = button.htmlLabel;
+         } );
+      }
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function createButtons( target, buttons ){
+      buttons.forEach( ( button, i ) => {
+         const btn = document.createElement( 'BUTTON' );
+         const text = document.createTextNode( buttons[ i ].htmlLabel );
+         btn.appendChild( text );
+         btn.id = button.id;
+         btn.className = returnCssClasses( button.classes );
+         btn.onclick = () => {
+            handleButtonClicked( { classes: button.classes, action: button.action, id: button.id } );
+         };
+         btn.type = 'button';
+         target.appendChild( btn );
+      } );
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function initialize() {
+      axWithDom( element => {
+         if( features.headline.i18nHtmlText ) {
+            const header = document.createElement( `H${features.headline.level}` );
+            const wrapper = document.createElement( 'DIV' );
+            const buttonsRightDiv = document.createElement( 'DIV' );
+            const buttonsLeftDiv = document.createElement( 'DIV' );
+            const textDiv = document.createElement( 'DIV' );
+            const text = document.createTextNode( model.headline.htmlText );
+
+            wrapper.appendChild( buttonsLeftDiv );
+            textDiv.appendChild( text );
+            wrapper.appendChild( textDiv );
+            wrapper.className = 'ax-local-wrapper-left';
+            buttonsLeftDiv.className = 'ax-local-buttons-left';
+            textDiv.className = 'ax-local-text';
+            textDiv.id = model.headline.id;
+
+            buttonsRightDiv.className = 'ax-local-buttons-right';
+            createButtons( buttonsRightDiv, model.areas.right );
+
+            buttonsLeftDiv.className = 'ax-local-buttons-left';
+            createButtons( buttonsLeftDiv, model.areas.left );
+
+            header.appendChild( wrapper );
+            header.appendChild( buttonsRightDiv );
+
+            element.appendChild( header );
+         }
+
+         if( features.intro.i18nHtmlText ){
+            const introDiv = document.createElement( 'DIV' );
+            const text = document.createTextNode( model.intro.htmlText );
+            introDiv.className = 'ax-local-intro-text';
+            introDiv.id = model.intro.id;
+            introDiv.appendChild( text );
+            element.appendChild( introDiv );
+         }
+      } );
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   return { onDomAvailable: initialize };
+
+
+}
