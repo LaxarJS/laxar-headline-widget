@@ -42,10 +42,12 @@ export function create( axWithDom, features, eventBus, i18n, context, axId ) {
 
    const model = {
       headline: {
-         htmlText: i18n.localize( features.headline.i18nHtmlText )
+         htmlText: i18n.localize( features.headline.i18nHtmlText ),
+         id: axId( 'headline' )
       },
       intro: {
-         htmlText: i18n.localize( features.intro.i18nHtmlText )
+         htmlText: i18n.localize( features.intro.i18nHtmlText ),
+         id: axId( 'intro' )
       },
       areas: {
          left: getButtonList( 'LEFT' ),
@@ -54,14 +56,19 @@ export function create( axWithDom, features, eventBus, i18n, context, axId ) {
    };
 
    i18n.whenLocaleChanged( () => {
-      model.headline.htmlText = i18n.localize( features.headline.i18nHtmlText );
-      model.intro.htmlText = i18n.localize( features.intro.i18nHtmlText );
+      model.headline.htmlText = i18n.localize( features.headline.i18nHtmlText ) ||
+                                 'please define `en` fallback localisation';
+      model.intro.htmlText = i18n.localize( features.intro.i18nHtmlText ) ||
+                                 'please define `en` fallback localisation';
       model.areas.left.forEach( button => {
-         button.htmlLabel = i18n.localize( button.i18nHtmlLabel );
+         button.htmlLabel = i18n.localize( button.i18nHtmlLabel ) ||
+                                 'please define `en` fallback localisation';
       } );
       model.areas.right.forEach( button => {
-         button.htmlLabel = i18n.localize( button.i18nHtmlLabel );
+         button.htmlLabel = i18n.localize( button.i18nHtmlLabel ) ||
+                                 'please define `en` fallback localisation';
       } );
+      updateText();
    } );
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -166,6 +173,23 @@ export function create( axWithDom, features, eventBus, i18n, context, axId ) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+   function updateText(){
+      if( document.querySelector( `#${model.headline.id}` ) ) {
+         document.querySelector( `#${model.headline.id}` ).innerHTML = model.headline.htmlText;
+         if( document.querySelector( `#${model.intro.id}` ) ) {
+            document.querySelector( `#${model.intro.id}` ).innerHTML = model.intro.htmlText;
+         }
+         model.areas.left.forEach(button => {
+            document.querySelector( `#${button.id}` ).innerHTML = button.htmlLabel;
+         } );
+         model.areas.right.forEach(button => {
+            document.querySelector( `#${button.id}` ).innerHTML = button.htmlLabel;
+         } );
+      }
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
    function createButtons( target, buttons ){
       buttons.forEach( ( button, i ) => {
          const btn = document.createElement( 'BUTTON' );
@@ -192,7 +216,7 @@ export function create( axWithDom, features, eventBus, i18n, context, axId ) {
             const buttonsRightDiv = document.createElement( 'DIV' );
             const buttonsLeftDiv = document.createElement( 'DIV' );
             const textDiv = document.createElement( 'DIV' );
-            const text = document.createTextNode( features.headline.i18nHtmlText[ 'en-US' ] );
+            const text = document.createTextNode( model.headline.htmlText );
 
             //ax-local-wrapper-left div
             wrapper.appendChild( buttonsLeftDiv );
@@ -201,6 +225,7 @@ export function create( axWithDom, features, eventBus, i18n, context, axId ) {
             wrapper.className = 'ax-local-wrapper-left';
             buttonsLeftDiv.className = 'ax-local-buttons-left';
             textDiv.className = 'ax-local-text';
+            textDiv.id = model.headline.id;
 
             //ax-local-buttons-right div
             buttonsRightDiv.className = 'ax-local-buttons-right';
@@ -221,8 +246,9 @@ export function create( axWithDom, features, eventBus, i18n, context, axId ) {
          //create intro (if needed)
          if( features.intro.i18nHtmlText ){
             const introDiv = document.createElement( 'DIV' );
-            const text = document.createTextNode( features.intro.i18nHtmlText[ 'en-US' ] );
+            const text = document.createTextNode( model.intro.htmlText );
             introDiv.className = 'ax-local-intro-text';
+            introDiv.id = model.intro.id;
             introDiv.appendChild( text );
             element.appendChild( introDiv );
          }
