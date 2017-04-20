@@ -56,17 +56,13 @@ export function create( axWithDom, features, eventBus, i18n, context, axId ) {
    };
 
    i18n.whenLocaleChanged( () => {
-      model.headline.htmlText = i18n.localize( features.headline.i18nHtmlText ) ||
-                                 'please define `en` fallback localisation';
-      model.intro.htmlText = i18n.localize( features.intro.i18nHtmlText ) ||
-                                 'please define `en` fallback localisation';
+      model.headline.htmlText = i18n.localize( features.headline.i18nHtmlText ) || '';
+      model.intro.htmlText = i18n.localize( features.intro.i18nHtmlText ) || '';
       model.areas.left.forEach( button => {
-         button.htmlLabel = i18n.localize( button.i18nHtmlLabel ) ||
-                                 'please define `en` fallback localisation';
+         button.htmlLabel = i18n.localize( button.i18nHtmlLabel ) || '';
       } );
       model.areas.right.forEach( button => {
-         button.htmlLabel = i18n.localize( button.i18nHtmlLabel ) ||
-                                 'please define `en` fallback localisation';
+         button.htmlLabel = i18n.localize( button.i18nHtmlLabel ) || '';
       } );
       updateText();
    } );
@@ -209,7 +205,6 @@ export function create( axWithDom, features, eventBus, i18n, context, axId ) {
 
    function initialize() {
       axWithDom( element => {
-         //create childs
          if( features.headline.i18nHtmlText ) {
             const header = document.createElement( `H${features.headline.level}` );
             const wrapper = document.createElement( 'DIV' );
@@ -218,7 +213,6 @@ export function create( axWithDom, features, eventBus, i18n, context, axId ) {
             const textDiv = document.createElement( 'DIV' );
             const text = document.createTextNode( model.headline.htmlText );
 
-            //ax-local-wrapper-left div
             wrapper.appendChild( buttonsLeftDiv );
             textDiv.appendChild( text );
             wrapper.appendChild( textDiv );
@@ -227,23 +221,18 @@ export function create( axWithDom, features, eventBus, i18n, context, axId ) {
             textDiv.className = 'ax-local-text';
             textDiv.id = model.headline.id;
 
-            //ax-local-buttons-right div
             buttonsRightDiv.className = 'ax-local-buttons-right';
             createButtons( buttonsRightDiv, model.areas.right );
 
-            //ax-local-buttons-left
             buttonsLeftDiv.className = 'ax-local-buttons-left';
             createButtons( buttonsLeftDiv, model.areas.left );
 
-            //header
             header.appendChild( wrapper );
             header.appendChild( buttonsRightDiv );
 
-            //element
             element.appendChild( header );
          }
 
-         //create intro (if needed)
          if( features.intro.i18nHtmlText ){
             const introDiv = document.createElement( 'DIV' );
             const text = document.createTextNode( model.intro.htmlText );
