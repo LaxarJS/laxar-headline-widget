@@ -2,7 +2,7 @@
 
 ## Last Changes
 
-- [#17](https://github.com/LaxarJS/ax-headline-widget/issues/17): widget integration technology is now `plain` instead of `angular`
+- [#17](https://github.com/LaxarJS/ax-headline-widget/issues/17): changed widget integration technology to plain javascript
 
 
 ## v4.0.0-alpha.1

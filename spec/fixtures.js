@@ -1,7 +1,7 @@
 /**
  * Copyright 2015-2017 aixigo AG
  * Released under the MIT license.
- * http://laxarjs.org/license
+ * https://laxarjs.org/license
  */
 export default {
    customButtons: [

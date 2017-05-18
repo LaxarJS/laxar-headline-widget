@@ -1,7 +1,7 @@
 /**
  * Copyright 2015-2017 aixigo AG
  * Released under the MIT license.
- * http://laxarjs.org/license
+ * https://laxarjs.org/license
  */
 import * as axMocks from 'laxar-mocks';
 import fixtures from './fixtures';
@@ -42,7 +42,7 @@ describe( 'A laxar-headline-widget', () => {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   describe( 'with a configured headline text', () => {
+   describe( 'with a configured headline text and an intro text', () => {
 
       createSetup( {
          headline: {
@@ -55,7 +55,7 @@ describe( 'A laxar-headline-widget', () => {
 
          intro: {
             i18nHtmlText: {
-               'de-DE': 'Willkommen zur Kopfzeile!',
+               'de-DE': 'Willkommen zur Überschrift!',
                'en-US': 'Welcome to the headline!'
             }
          }
@@ -67,27 +67,64 @@ describe( 'A laxar-headline-widget', () => {
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-      it( 'computes the localized headline', () => {
+      it( 'displays the localized headline (R1.1)', () => {
          expect( widgetDom.querySelector( '.ax-local-text' ).innerHTML ).toEqual( 'Hallo Welt' );
          useLocale( 'en-US' );
          expect( widgetDom.querySelector( '.ax-local-text' ).innerHTML ).toEqual( 'Hello World' );
       } );
 
-      // R1.1, R1.2, R1.3: No complex UI tests for simple HTML markup with AngularJS directives.
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      it( 'displays the headline with the configured level (R1.3)', () => {
+         expect( widgetDom.querySelector( 'h3' ) ).toEqual( null );
+         expect( widgetDom.querySelector( 'h4' ) ).not.toEqual( null );
+      } );
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      it( 'displays the localized intro (R2.1)', () => {
+         const introElement = widgetDom.querySelector( '.ax-local-intro-text' );
+         expect( introElement ).not.toBe( null );
+
+         useLocale( 'en-US' );
+         expect( introElement.innerHTML ).toEqual( 'Welcome to the headline!' );
+
+         useLocale( 'de-DE' );
+         expect( introElement.innerHTML ).toEqual( 'Willkommen zur Überschrift!' );
+      } );
+   } );
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   describe( 'with no configured headline text and no configured intro text', () => {
+
+      createSetup( {} );
+
+      beforeEach( () => {
+         useLocale( 'de-DE' );
+      } );
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      it( 'doesn\'t render a headline (R1.2)', () => {
+         expect( widgetDom.querySelector( '.ax-local-text' ) ).toBe( null );
+      } );
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      it( 'does NOT create an intro (R2.1)', () => {
+         expect( widgetDom.querySelector( '.ax-local-intro-text' ) ).toBe( null );
+      } );
 
    } );
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   // R3.1: No complex UI tests for simple CSS and HTML markup.
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   describe( 'with configured buttons', () => {
+   describe( 'with configured buttons for both areas', () => {
       createSetup( {
          headline: {
             i18nHtmlText: {
-               'de-DE': 'Überschrifttest',
+               'de-DE': 'Überschrift',
                'it-IT': 'Titolo',
                'en': 'Headline'
             }
@@ -105,6 +142,8 @@ describe( 'A laxar-headline-widget', () => {
             { i18nHtmlLabel: { 'en': 'J' }, action: 'actionD', index: 0, align: 'LEFT' }
          ]
       } );
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       it( 'puts them into the correct areas (R3.2)', () => {
          expect( widgetDom.querySelectorAll( '.btn' )[ 0 ].innerHTML ).toEqual( 'H' );
@@ -127,7 +166,7 @@ describe( 'A laxar-headline-widget', () => {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   describe( 'with configured buttons', () => {
+   describe( 'with configured buttons some enabled and some disabled', () => {
 
       createSetup( {
          headline: {
@@ -138,25 +177,20 @@ describe( 'A laxar-headline-widget', () => {
             }
          },
          buttons: [
-            { i18nHtmlLabel: { 'en': 'A', 'de-DE': 'Ä' }, action: 'actionA' },
-            { i18nHtmlLabel: { 'en': 'O', 'de-DE': 'Ö' }, action: 'actionB', enabled: false },
-            { i18nHtmlLabel: { 'en': 'U', 'de-DE': 'Ü' }, action: 'actionC', enabled: true }
+            { i18nHtmlLabel: { 'de-DE': 'A' }, action: 'actionA' },
+            { i18nHtmlLabel: { 'de-DE': 'B' }, action: 'actionB', enabled: false },
+            { i18nHtmlLabel: { 'de-DE': 'C' }, action: 'actionC', enabled: true },
+            { i18nHtmlLabel: { 'de-DE': 'D' }, action: 'actionD', enabled: false }
          ]
       } );
 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
       it( 'excludes buttons that have been configured to be disabled (R3.5)', () => {
-
-         useLocale( 'en' );
-
-         expect( widgetDom.querySelectorAll( '.btn' )[ 0 ].innerHTML ).toEqual( 'A' );
-         expect( widgetDom.querySelectorAll( '.btn' )[ 1 ].innerHTML ).toEqual( 'U' );
-
-         expect( widgetDom.querySelectorAll( '.btn' ).length ).toBe( 2 );
-
          useLocale( 'de-DE' );
 
-         expect( widgetDom.querySelectorAll( '.btn' )[ 0 ].innerHTML ).toEqual( 'Ä' );
-         expect( widgetDom.querySelectorAll( '.btn' )[ 1 ].innerHTML ).toEqual( 'Ü' );
+         expect( widgetDom.querySelectorAll( '.btn' )[ 0 ].innerHTML ).toEqual( 'A' );
+         expect( widgetDom.querySelectorAll( '.btn' )[ 1 ].innerHTML ).toEqual( 'C' );
 
          expect( widgetDom.querySelectorAll( '.btn' ).length ).toBe( 2 );
       } );
@@ -170,7 +204,7 @@ describe( 'A laxar-headline-widget', () => {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   describe( 'with configured buttons', () => {
+   describe( 'with configured buttons with index attribute', () => {
 
       createSetup( {
          headline: {
@@ -197,7 +231,7 @@ describe( 'A laxar-headline-widget', () => {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   describe( 'with configured buttons', () => {
+   describe( 'with configured buttons with classes', () => {
       createSetup( {
          headline: {
             i18nHtmlText: {
@@ -218,6 +252,8 @@ describe( 'A laxar-headline-widget', () => {
             { i18nHtmlLabel: { 'de-DE': 'I' }, action: 'actionI', 'class': 'NORMAL' }
          ]
       } );
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       it( 'assigns a CSS class to each button based on the configured class (R3.9)', () => {
 
@@ -248,7 +284,7 @@ describe( 'A laxar-headline-widget', () => {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   describe( 'with configured buttons', () => {
+   describe( 'with configured buttons with different sizes', () => {
       createSetup( {
          headline: {
             i18nHtmlText: {
@@ -265,6 +301,8 @@ describe( 'A laxar-headline-widget', () => {
             { i18nHtmlLabel: { 'de-DE': 'E' }, action: 'actionE', size: 'LARGE' }
          ]
       } );
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       it( 'assigns a CSS class to each button based on the configured size (R3.10)', () => {
 
@@ -288,7 +326,7 @@ describe( 'A laxar-headline-widget', () => {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   describe( 'with configured buttons', () => {
+   describe( 'with configured buttons with flags', () => {
 
       describe( 'when configured flags change', () => {
 
@@ -388,9 +426,9 @@ describe( 'A laxar-headline-widget', () => {
             //////////////////////////////////////////////////////////////////////////////////////////////////
 
             it( 'no user interaction is possible', () => {
-               fireEvent( buttons[ 0 ], 'click' );
-               fireEvent( buttons[ 1 ], 'click' );
-               fireEvent( buttons[ 2 ], 'click' );
+               buttons[ 0 ].onclick();
+               buttons[ 1 ].onclick();
+               buttons[ 2 ].onclick();
                testEventBus.flush();
 
                expect( actionRequestSpy.calls.count() ).toBe( 0 );
@@ -404,9 +442,9 @@ describe( 'A laxar-headline-widget', () => {
                changeFlagAndFlush( 'helpAvailable', true );
                changeFlagAndFlush( 'notUndoable', false );
 
-               fireEvent( buttons[ 0 ], 'click' );
-               fireEvent( buttons[ 1 ], 'click' );
-               fireEvent( buttons[ 2 ], 'click' );
+               buttons[ 0 ].onclick();
+               buttons[ 1 ].onclick();
+               buttons[ 2 ].onclick();
                testEventBus.flush();
 
                expect( actionRequestSpy.calls.count() ).toBe( 3 );
@@ -451,7 +489,7 @@ describe( 'A laxar-headline-widget', () => {
 
          it( 'publishes a takeActionRequest for the configured action (R3.13)', () => {
             button = widgetDom.querySelector( '.btn' );
-            fireEvent( button, 'click' );
+            button.onclick();
             testEventBus.flush();
 
             expect( spy ).toHaveBeenCalled();
@@ -463,7 +501,7 @@ describe( 'A laxar-headline-widget', () => {
 
          it( 'sends the button\'s id as event.anchorDomElement (R3.13)', () => {
             button = widgetDom.querySelector( '.btn' );
-            fireEvent( button, 'click' );
+            button.onclick();
             testEventBus.flush();
             expect( spy.calls.argsFor( 0 )[ 0 ].anchorDomElement ).toMatch( /actionY_0/ );
          } );
@@ -485,7 +523,7 @@ describe( 'A laxar-headline-widget', () => {
                testEventBus.publish( 'willTakeAction.actionY', { action: 'actionY' }, { sender: 'spec' } );
             } );
 
-            fireEvent( button, 'click' );
+            button.onclick();
             testEventBus.flush();
             expect( button.className ).toMatch( /ax-active/ );
 
@@ -504,7 +542,7 @@ describe( 'A laxar-headline-widget', () => {
             beforeEach( () => {
                button = widgetDom.querySelector( '.btn' );
                widgetEventBus.publishAndGatherReplies.and.callFake( () => Promise.reject() );
-               fireEvent( button, 'click' );
+               button.onclick();
             } );
 
             it( 'resets the button state (R3.14)', done => {
@@ -591,7 +629,7 @@ describe( 'A laxar-headline-widget', () => {
             changeFlag( 'guestUser', true );
             testEventBus.flush();
 
-            fireEvent( button, 'click' );
+            button.onclick();
             testEventBus.flush();
 
             expect( spy.calls.count() ).toBe( 0 );
@@ -607,7 +645,7 @@ describe( 'A laxar-headline-widget', () => {
             changeFlag( 'guestUser', false );
             testEventBus.flush();
 
-            fireEvent( button, 'click' );
+            button.onclick();
             testEventBus.flush();
 
             expect( spy.calls.count() ).toBe( 1 );
@@ -619,7 +657,7 @@ describe( 'A laxar-headline-widget', () => {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   describe( 'with configured buttons', () => {
+   describe( 'with configured buttons with different labels for different languages', () => {
       let button;
       createSetup( () => {
          button = {
@@ -643,68 +681,14 @@ describe( 'A laxar-headline-widget', () => {
          };
       } );
 
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
       it( 'selects the HTML label based on the current locale (R4.1)', () => {
-         const domButton = widgetDom.querySelector( '.btn' );
          useLocale( 'it-IT' );
-         expect( domButton.innerHTML ).toEqual( button.i18nHtmlLabel[ 'it-IT' ] );
+         expect( widgetDom.querySelector( '.btn' ).innerHTML ).toEqual( button.i18nHtmlLabel[ 'it-IT' ] );
 
          useLocale( 'en-US' );
-         expect( domButton.innerHTML ).toEqual( button.i18nHtmlLabel[ 'en-US' ] );
-      } );
-
-   } );
-
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   describe( 'with configured intro', () => {
-      createSetup( () => {
-         return {
-            headline: {
-               i18nHtmlText: {
-                  'en-US': 'Headline',
-                  'de-DE': 'Überschrift'
-               }
-            },
-            intro: {
-               i18nHtmlText: {
-                  'en-US': 'This is a intro text.',
-                  'de-DE': 'Dies ist ein Introtext.'
-               }
-            }
-         };
-      } );
-
-      it( 'does create an intro div and selects the HTML text based on the current locale (R4.1)', () => {
-         const domIntro = widgetDom.querySelector( '.ax-local-intro-text' );
-         expect( domIntro ).not.toBe( null );
-
-         useLocale( 'en-US' );
-         expect( domIntro.innerHTML ).toEqual( 'This is a intro text.' );
-
-         useLocale( 'de-DE' );
-         expect( domIntro.innerHTML ).toEqual( 'Dies ist ein Introtext.' );
-      } );
-
-   } );
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   describe( 'with no configured intro', () => {
-      createSetup( () => {
-         return {
-            headline: {
-               i18nHtmlText: {
-                  'en-US': 'Headline',
-                  'de-DE': 'Überschrift'
-               }
-            }
-         };
-      } );
-
-      it( 'does NOT create an intro div', () => {
-         const domIntro = widgetDom.querySelector( '.ax-local-intro-text' );
-         expect( domIntro ).toBe( null );
+         expect( widgetDom.querySelector( '.btn' ).innerHTML ).toEqual( button.i18nHtmlLabel[ 'en-US' ] );
       } );
 
    } );
@@ -729,15 +713,4 @@ function changeFlag( flag, state, sender = 'spec' ) {
 function changeFlagAndFlush( flag, state, sender = 'spec' ) {
    testEventBus.publish( `didChangeFlag.${flag}.${state}`, { flag, state }, { sender } );
    testEventBus.flush();
-}
-
-function fireEvent(el, etype){
-   if(el.fireEvent) {
-      el.fireEvent(`on${etype}`);
-   }
-   else {
-      const evObj = document.createEvent('Events');
-      evObj.initEvent(etype, true, false);
-      el.dispatchEvent(evObj);
-   }
 }

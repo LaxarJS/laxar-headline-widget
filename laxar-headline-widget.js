@@ -1,9 +1,12 @@
 /**
   * Copyright 2015-2017 aixigo AG
   * Released under the MIT license
-  * www.laxarjs.org
+  * https://www.laxarjs.org
  */
-const BUTTON_STANDART_CLASS = 'btn';
+
+import * as patterns from 'laxar-patterns';
+
+const BUTTON_STANDARD_CLASS = 'btn';
 const BUTTON_CLASS_PREFIX = 'btn-';
 const BUTTON_CLASS_ACTIVE = 'ax-active';
 const BUTTON_CLASS_HIDDEN = 'ax-invisible';
@@ -37,9 +40,8 @@ const CONFIG_TO_BOOTSTRAP_SIZE_MAP = {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-import * as patterns from 'laxar-patterns';
 export const injections = [ 'axWithDom', 'axFeatures', 'axEventBus', 'axI18n', 'axContext', 'axId' ];
-export function create( axWithDom, features, eventBus, i18n, context, axId ) {
+export function create( withDom, features, eventBus, i18n, context, axId ) {
    const flagHandler = patterns.flags.handlerFor( context );
 
    const model = {
@@ -58,35 +60,16 @@ export function create( axWithDom, features, eventBus, i18n, context, axId ) {
    };
 
    i18n.whenLocaleChanged( () => {
-      model.headline.htmlText = i18n.localize( features.headline.i18nHtmlText ) || '';
-      model.intro.htmlText = i18n.localize( features.intro.i18nHtmlText ) || '';
+      model.headline.htmlText = i18n.localize( features.headline.i18nHtmlText, '' );
+      model.intro.htmlText = i18n.localize( features.intro.i18nHtmlText, '' );
       model.areas.left.forEach( button => {
-         button.htmlLabel = i18n.localize( button.i18nHtmlLabel ) || '';
+         button.htmlLabel = i18n.localize( button.i18nHtmlLabel, '' );
       } );
       model.areas.right.forEach( button => {
-         button.htmlLabel = i18n.localize( button.i18nHtmlLabel ) || '';
+         button.htmlLabel = i18n.localize( button.i18nHtmlLabel, '' );
       } );
       updateText();
    } );
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   function handleButtonClicked({ classes, action, id }) {
-      const shouldCancel = Object.keys( BUTTON_STATE_TRIGGER_TO_CLASS_MAP )
-         .some( stateTrigger => classes[ BUTTON_STATE_TRIGGER_TO_CLASS_MAP[ stateTrigger ] ] );
-      if( shouldCancel ) { return; }
-
-      classes[ BUTTON_CLASS_ACTIVE ] = true;
-      updateClasses( id, classes );
-      function reset() {
-         classes[ BUTTON_CLASS_ACTIVE ] = false;
-         updateClasses( id, classes );
-      }
-
-      eventBus
-         .publishAndGatherReplies( `takeActionRequest.${action}`, { action, anchorDomElement: id } )
-         .then( reset, reset );
-   }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -143,13 +126,12 @@ export function create( axWithDom, features, eventBus, i18n, context, axId ) {
          const sizeClass = BUTTON_CLASS_PREFIX + CONFIG_TO_BOOTSTRAP_SIZE_MAP[ size ];
          classes[ sizeClass ] = true;
       }
-
       return classes;
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   function updateClasses( id, classes ){
+   function updateClasses( id, classes ) {
       const element = document.getElementById( id );
       if( !element ) { return; }
       element.className = returnCssClasses(classes);
@@ -157,13 +139,12 @@ export function create( axWithDom, features, eventBus, i18n, context, axId ) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   function returnCssClasses( classes ){
-      let res = BUTTON_STANDART_CLASS;
+   function returnCssClasses( classes ) {
+      let res = BUTTON_STANDARD_CLASS;
       const keys = Object.keys( classes );
       keys.forEach( className => {
          if( classes[ className ] ){
-            res += ' ';
-            res += className;
+            res += ` ${className}`;
          }
       } );
       return res;
@@ -171,7 +152,7 @@ export function create( axWithDom, features, eventBus, i18n, context, axId ) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   function updateText(){
+   function updateText() {
       if( document.querySelector( `#${model.headline.id}` ) ) {
          document.querySelector( `#${model.headline.id}` ).innerHTML = model.headline.htmlText;
          if( document.querySelector( `#${model.intro.id}` ) ) {
@@ -188,67 +169,96 @@ export function create( axWithDom, features, eventBus, i18n, context, axId ) {
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   function createButtons( target, buttons ){
+   function createButtons( parent, buttons ) {
       buttons.forEach( ( button, i ) => {
          const btn = document.createElement( 'BUTTON' );
          const text = document.createTextNode( buttons[ i ].htmlLabel );
          btn.appendChild( text );
          btn.id = button.id;
          btn.className = returnCssClasses( button.classes );
-         btn.onclick = () => {
-            handleButtonClicked( { classes: button.classes, action: button.action, id: button.id } );
-         };
+         btn.onclick = handleButtonClicked( button );
          btn.type = 'button';
-         target.appendChild( btn );
+         parent.appendChild( btn );
+      } );
+   }
+
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function handleButtonClicked( button ) {
+      return () => {
+         const classes = button.classes;
+         const action = button.action;
+         const id = button.id;
+         const shouldCancel = Object.keys( BUTTON_STATE_TRIGGER_TO_CLASS_MAP )
+            .some( stateTrigger => classes[ BUTTON_STATE_TRIGGER_TO_CLASS_MAP[ stateTrigger ] ] );
+         if( shouldCancel ) { return; }
+
+         classes[ BUTTON_CLASS_ACTIVE ] = true;
+         updateClasses( id, classes );
+         function reset() {
+            classes[ BUTTON_CLASS_ACTIVE ] = false;
+            updateClasses( id, classes );
+         }
+
+         eventBus
+            .publishAndGatherReplies( `takeActionRequest.${action}`, { action, anchorDomElement: id } )
+            .then( reset, reset );
+      };
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function renderHeadline( element ) {
+      const header = document.createElement( `H${features.headline.level}` );
+      const wrapper = document.createElement( 'DIV' );
+      const buttonsRightDiv = document.createElement( 'DIV' );
+      const buttonsLeftDiv = document.createElement( 'DIV' );
+      const textDiv = document.createElement( 'DIV' );
+      const text = document.createTextNode( model.headline.htmlText );
+
+      wrapper.appendChild( buttonsLeftDiv );
+      textDiv.appendChild( text );
+      wrapper.appendChild( textDiv );
+      wrapper.className = 'ax-local-wrapper-left';
+      buttonsLeftDiv.className = 'ax-local-buttons-left';
+      textDiv.className = 'ax-local-text';
+      textDiv.id = model.headline.id;
+
+      buttonsRightDiv.className = 'ax-local-buttons-right';
+      createButtons( buttonsRightDiv, model.areas.right );
+
+      buttonsLeftDiv.className = 'ax-local-buttons-left';
+      createButtons( buttonsLeftDiv, model.areas.left );
+
+      header.appendChild( wrapper );
+      header.appendChild( buttonsRightDiv );
+
+      element.appendChild( header );
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function renderIntro( dom ) {
+      const introDiv = document.createElement( 'DIV' );
+      const text = document.createTextNode( model.intro.htmlText );
+      introDiv.className = 'ax-local-intro-text';
+      introDiv.id = model.intro.id;
+      introDiv.appendChild( text );
+      dom.appendChild( introDiv );
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+   function render() {
+      withDom( dom => {
+         if( features.headline.i18nHtmlText ) { renderHeadline( dom ); }
+         if( features.intro.i18nHtmlText ){ renderIntro( dom ); }
       } );
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-   function initialize() {
-      axWithDom( element => {
-         if( features.headline.i18nHtmlText ) {
-            const header = document.createElement( `H${features.headline.level}` );
-            const wrapper = document.createElement( 'DIV' );
-            const buttonsRightDiv = document.createElement( 'DIV' );
-            const buttonsLeftDiv = document.createElement( 'DIV' );
-            const textDiv = document.createElement( 'DIV' );
-            const text = document.createTextNode( model.headline.htmlText );
-
-            wrapper.appendChild( buttonsLeftDiv );
-            textDiv.appendChild( text );
-            wrapper.appendChild( textDiv );
-            wrapper.className = 'ax-local-wrapper-left';
-            buttonsLeftDiv.className = 'ax-local-buttons-left';
-            textDiv.className = 'ax-local-text';
-            textDiv.id = model.headline.id;
-
-            buttonsRightDiv.className = 'ax-local-buttons-right';
-            createButtons( buttonsRightDiv, model.areas.right );
-
-            buttonsLeftDiv.className = 'ax-local-buttons-left';
-            createButtons( buttonsLeftDiv, model.areas.left );
-
-            header.appendChild( wrapper );
-            header.appendChild( buttonsRightDiv );
-
-            element.appendChild( header );
-         }
-
-         if( features.intro.i18nHtmlText ){
-            const introDiv = document.createElement( 'DIV' );
-            const text = document.createTextNode( model.intro.htmlText );
-            introDiv.className = 'ax-local-intro-text';
-            introDiv.id = model.intro.id;
-            introDiv.appendChild( text );
-            element.appendChild( introDiv );
-         }
-      } );
-   }
-
-   ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-   return { onDomAvailable: initialize };
-
+   return { onDomAvailable: render };
 
 }

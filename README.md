@@ -1,6 +1,6 @@
 # laxar-headline-widget [![Build Status](https://travis-ci.org/LaxarJS/ax-headline-widget.svg?branch=master)](https://travis-ci.org/LaxarJS/ax-headline-widget)
 
-> A headline, possibly followed by a subtitle and/or buttons, as a LaxarJS v2 widget targeting AngularJS v1
+> A headline, possibly followed by a subtitle and/or buttons
 
 
 ## Content
@@ -13,6 +13,7 @@
 
 
 ## Appearance
+
 The style of the widget elements are mostly affected by the theme which defines the rendering of the headline and default HTML elements.
 
 ![Illustration of the laxar-headline-widget](docs/img/example_1.png)
@@ -38,6 +39,7 @@ An laxar-headline-widget with a headline with level 6 and a button with a icon o
 ## Usage
 
 ### Installation
+
 For installation instruction take a look at the [LaxarJS documentation](http://laxarjs.org/docs/laxar-v2-latest/manuals/installing_widgets/).
 
 
@@ -148,16 +150,19 @@ When a button or it's associated `access key` is pressed the widget MUST publish
 ## Integration
 
 ### Patterns
+
 The widget supports the following event patterns as specified by the [LaxarJS Patterns] document.
 
 
 #### Actions
+
 * Action: `buttons.*.action`
    * Role: Sender
    * Description: Publish a `takeActionRequest` event if a button is pressed (or activated by an `access key`).
 
 
 #### Flags
+
 * Flag: `didChangeFlag.{features.*.omitOn|hideOn|disableOn|busyOn}.{true|false}`
    * Role: Receiver
    * Description: Determines the state of a button (hide or disable etc.).
