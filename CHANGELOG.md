@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#19](https://github.com/LaxarJS/ax-headline-widget/issues/19): fixed headline, introtext and button with html
+
 - [#17](https://github.com/LaxarJS/ax-headline-widget/issues/17): changed widget integration technology to plain javascript
 
 

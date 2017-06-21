@@ -172,8 +172,7 @@ export function create( withDom, features, eventBus, i18n, context, axId ) {
    function createButtons( parent, buttons ) {
       buttons.forEach( ( button, i ) => {
          const btn = document.createElement( 'BUTTON' );
-         const text = document.createTextNode( buttons[ i ].htmlLabel );
-         btn.appendChild( text );
+         btn.innerHTML = buttons[ i ].htmlLabel;
          btn.id = button.id;
          btn.className = returnCssClasses( button.classes );
          btn.onclick = handleButtonClicked( button );
@@ -215,10 +214,9 @@ export function create( withDom, features, eventBus, i18n, context, axId ) {
       const buttonsRightDiv = document.createElement( 'DIV' );
       const buttonsLeftDiv = document.createElement( 'DIV' );
       const textDiv = document.createElement( 'DIV' );
-      const text = document.createTextNode( model.headline.htmlText );
 
       wrapper.appendChild( buttonsLeftDiv );
-      textDiv.appendChild( text );
+      textDiv.innerHTML = model.headline.htmlText;
       wrapper.appendChild( textDiv );
       wrapper.className = 'ax-local-wrapper-left';
       buttonsLeftDiv.className = 'ax-local-buttons-left';
@@ -241,10 +239,9 @@ export function create( withDom, features, eventBus, i18n, context, axId ) {
 
    function renderIntro( dom ) {
       const introDiv = document.createElement( 'DIV' );
-      const text = document.createTextNode( model.intro.htmlText );
       introDiv.className = 'ax-local-intro-text';
       introDiv.id = model.intro.id;
-      introDiv.appendChild( text );
+      introDiv.innerHTML = model.intro.htmlText;
       dom.appendChild( introDiv );
    }
 
