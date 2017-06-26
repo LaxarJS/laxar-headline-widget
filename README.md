@@ -1,4 +1,4 @@
-# laxar-headline-widget [![Build Status](https://travis-ci.org/LaxarJS/ax-headline-widget.svg?branch=master)](https://travis-ci.org/LaxarJS/ax-headline-widget)
+# laxar-headline-widget [![Build Status](https://travis-ci.org/LaxarJS/laxar-headline-widget.svg?branch=master)](https://travis-ci.org/LaxarJS/laxar-headline-widget)
 
 > A headline, possibly followed by a subtitle and/or buttons
 
