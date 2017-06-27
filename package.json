@@ -1,6 +1,6 @@
 {
   "name": "laxar-headline-widget",
-  "version": "4.0.0-alpha.1",
+  "version": "4.0.0-rc.0",
   "description": "Headline widget with configurable buttons and intro",
   "homepage": "http://laxarjs.org",
   "main": "laxar-headline-widget.js",
