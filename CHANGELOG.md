@@ -3,6 +3,7 @@
 ## Last Changes
 
 
+## v4.0.0
 ## v4.0.0-rc.0
 
 - [#20](https://github.com/LaxarJS/laxar-headline-widget/issues/20): renamed repository to match artifact
