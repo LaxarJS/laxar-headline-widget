@@ -530,8 +530,11 @@ describe( 'A laxar-headline-widget', () => {
             testEventBus.publish( 'didTakeAction.actionY', { action: 'actionY' }, { sender: 'spec' } );
             testEventBus.flush();
             awaitGatherReplies().then( () => {
-               expect( button.className ).not.toMatch( /ax-active/ );
-               done();
+               // timeout added for stable test behavior in MSIE11
+               setTimeout( () => {
+                  expect( button.className ).not.toMatch( /ax-active/ );
+                  done();
+               }, 10 );
             } );
          } );
 

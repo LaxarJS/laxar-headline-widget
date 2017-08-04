@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#21](https://github.com/LaxarJS/laxar-headline-widget/issues/21): fixed spec test that was flaky on MSIE11
+
 
 ## v4.0.0
 ## v4.0.0-rc.0
