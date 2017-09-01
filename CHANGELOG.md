@@ -2,6 +2,8 @@
 
 ## Last Changes
 
+- [#15](https://github.com/LaxarJS/ax-headline-widget/issues/15): descriptor: fixed JSON schema
+
 
 ## v3.5.0
 
