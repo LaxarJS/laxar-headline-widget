@@ -92,8 +92,7 @@
                      "type": "string",
                      "format": "topic",
                      "axRole": "outlet",
-                     "description": "Topic name of the action to request taking upon button activation.",
-                     "required": true
+                     "description": "Topic name of the action to request taking upon button activation."
                   },
                   "accessKey": {
                      "type": "string",
